@@ -1,0 +1,281 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Dashboard</h2>
+
+<!-- Stats -->
+<div class="stat-grid" id="stats"></div>
+
+<!-- Charts -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+  <div class="card">
+    <h3 style="font-weight:600;margin-bottom:1rem;">Estoque por UBS</h3>
+    <div id="chartUBS"></div>
+  </div>
+  <div class="card">
+    <h3 style="font-weight:600;margin-bottom:1rem;">Status do Estoque</h3>
+    <div id="chartStatus"></div>
+  </div>
+</div>
+
+<!-- Alertas -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+  <div class="card">
+    <h3 style="font-weight:600;margin-bottom:1rem;">⚠️ Estoque Baixo</h3>
+    <div id="alertasBaixo"></div>
+  </div>
+  <div class="card">
+    <h3 style="font-weight:600;margin-bottom:1rem;">🕐 Movimentações Recentes</h3>
+    <div id="movRecentes"></div>
+  </div>
+</div>
+{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% block scripts %}
+<script>
+async function loadDashboard() {
+  const [ubs, meds, ests, movs] = await Promise.all([
+    api('/api/ubs'), api('/api/medicamentos'),
+    api('/api/estoques'), api('/api/movimentacoes')
+  ]);
+
+  const totalQtd = ests.reduce((s, e) => s + (e.quantidade || 0), 0);
+  const baixo = ests.filter(e => e.quantidade > 0 && e.quantidade <= 10);
+  const indisponivel = ests.filter(e => e.quantidade <= 0);
+  const vencidos = ests.filter(e => {
+    if (!e.validade) return false;
+    return new Date(e.validade) < new Date();
+  });
+
+  // Stats
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light);color:var(--primary);">🏥</div><div><div class="stat-value">${ubs.length}</div><div class="stat-label">UBS Cadastradas</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--accent-light);color:var(--accent);">💊</div><div><div class="stat-value">${meds.length}</div><div class="stat-label">Medicamentos</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--success-light);color:var(--success);">📦</div><div><div class="stat-value">${totalQtd}</div><div class="stat-label">Itens em Estoque</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light);color:var(--warning);">⚠️</div><div><div class="stat-value">${baixo.length + vencidos.length}</div><div class="stat-label">Alertas</div></div></div>
+  `;
+
+  // Chart UBS (barras simples)
+/*
+  const porUBS = {};
+  ubs.forEach(u => porUBS[u.id] = { nome: u.nome, qtd: 0 });
+  ests.forEach(e => { if (porUBS[e.ubs_id]) porUBS[e.ubs_id].qtd += e.quantidade || 0; });
+  const maxQtd = Math.max(...Object.values(porUBS).map(v => v.qtd), 1);
+  document.getElementById('chartUBS').innerHTML = Object.values(porUBS).map(v => `
+    <div style="margin-bottom:0.5rem;">
+      <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.25rem;">
+        <span>${v.nome}</span><span>${v.qtd}</span>
+      </div>
+      <div style="height:8px;background:var(--primary-light);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${(v.qtd/maxQtd)*100}%;background:var(--primary);border-radius:4px;"></div>
+      </div>
+    </div>`).join('');
+*/
+// ===============================
+// Gráfico de Estoque por UBS
+// ===============================
+
+const porUBS = {};
+
+ubs.forEach(u => {
+    porUBS[u.id] = {
+        nome: u.nome,
+        qtd: 0
+    };
+});
+
+ests.forEach(e => {
+    if (porUBS[e.ubs_id]) {
+        porUBS[e.ubs_id].qtd += e.quantidade || 0;
+    }
+});
+
+document.getElementById("chartUBS").innerHTML =
+'<canvas id="graficoUBS" height="280"></canvas>';
+
+const ctxUBS = document.getElementById("graficoUBS");
+
+new Chart(ctxUBS, {
+
+    type: 'bar',
+
+    data: {
+
+        labels: Object.values(porUBS).map(x => x.nome),
+
+        datasets: [{
+
+            label: 'Itens em Estoque',
+
+            data: Object.values(porUBS).map(x => x.qtd),
+
+            backgroundColor: '#1a8a5e',
+
+            borderRadius: 8,
+
+            borderSkipped: false,
+
+            maxBarThickness: 45
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+            legend: {
+
+                display: false
+
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                grid: {
+
+                    color: '#ececec'
+
+                },
+
+                ticks: {
+
+                    precision: 0
+
+                }
+
+            },
+
+            x: {
+
+                grid: {
+
+                    display: false
+
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+
+  // Chart Status
+  /*
+  document.getElementById('chartStatus').innerHTML = `
+    <div style="display:flex;gap:0.5rem;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;padding:0.5rem;border-radius:0.5rem;background:var(--success-light);">
+        <span style="font-size:0.875rem;color:var(--success);">Disponível</span><span style="font-weight:600;color:var(--success);">${ests.length - baixo.length - indisponivel.length}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.5rem;border-radius:0.5rem;background:var(--warning-light);">
+        <span style="font-size:0.875rem;color:#92400e;">Estoque Baixo</span><span style="font-weight:600;color:#92400e;">${baixo.length}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.5rem;border-radius:0.5rem;background:var(--danger-light);">
+        <span style="font-size:0.875rem;color:var(--danger);">Indisponível</span><span style="font-weight:600;color:var(--danger);">${indisponivel.length}</span>
+      </div>
+    </div>`;
+*/
+// ===============================
+// Gráfico Doughnut - Status Estoque
+// ===============================
+
+const disponivel = ests.length - baixo.length - indisponivel.length;
+
+const ctxStatus = document.createElement('canvas');
+
+document.getElementById('chartStatus').innerHTML = "";
+document.getElementById('chartStatus').style.height = "320px";
+document.getElementById('chartStatus').appendChild(ctxStatus);
+
+new Chart(ctxStatus, {
+    type: 'doughnut',
+
+    data: {
+        labels: [
+            'Disponível',
+            'Estoque Baixo',
+            'Indisponível'
+        ],
+
+        datasets: [{
+            data: [
+                disponivel,
+                baixo.length,
+                indisponivel.length
+            ],
+
+            backgroundColor: [
+                '#22c55e',
+                '#f59e0b',
+                '#ef4444'
+            ],
+
+            borderWidth: 0,
+            hoverOffset: 15
+        }]
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        cutout: '68%',
+
+        plugins: {
+
+            legend: {
+
+                position: 'bottom',
+
+                labels: {
+                    usePointStyle: true,
+                    padding:20,
+                    font:{
+                        size:13
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+  // Alertas baixo
+  document.getElementById('alertasBaixo').innerHTML = baixo.length === 0
+    ? '<p style="color:var(--text-muted);font-size:0.875rem;">Nenhum alerta.</p>'
+    : baixo.map(e => `<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.875rem;"><span>${e.medicamento_nome}</span><span class="badge badge-warning">${e.quantidade} unid.</span></div>`).join('');
+
+  // Movimentações recentes
+  const recentes = movs.slice(0, 5);
+  document.getElementById('movRecentes').innerHTML = recentes.length === 0
+    ? '<p style="color:var(--text-muted);font-size:0.875rem;">Nenhuma movimentação.</p>'
+    : recentes.map(m => `<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.875rem;">
+        <span>${m.tipo === 'Entrada' ? '📥' : '📤'} ${m.medicamento_nome}</span>
+        <span class="badge ${m.tipo === 'Entrada' ? 'badge-info' : 'badge-danger'}">${m.quantidade}</span>
+      </div>`).join('');
+}
+
+loadDashboard();
+</script>
+{% endblock %}

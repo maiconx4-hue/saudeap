@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaúdeAP — Painel Administrativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">❤</div>
+        <div>
+          <h1 style="font-size:1.125rem;font-weight:700;line-height:1.2;">SaúdeAP</h1>
+          <p style="font-size:0.625rem;color:var(--text-muted);">Painel Administrativo</p>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('admin.dashboard') }}" class="nav-item {{ 'active' if active_page == 'dashboard' }}"><span>📊</span> Dashboard</a>
+        <a href="{{ url_for('admin.medicamentos') }}" class="nav-item {{ 'active' if active_page == 'medicamentos' }}"><span>💊</span> Medicamentos</a>
+        <a href="{{ url_for('admin.ubs') }}" class="nav-item {{ 'active' if active_page == 'ubs' }}"><span>🏥</span> UBS</a>
+        <a href="{{ url_for('admin.estoque') }}" class="nav-item {{ 'active' if active_page == 'estoque' }}"><span>📦</span> Estoque</a>
+        <a href="{{ url_for('admin.movimentacoes') }}" class="nav-item {{ 'active' if active_page == 'movimentacoes' }}"><span>🔄</span> Movimentações</a>
+        <a href="{{ url_for('admin.relatorios') }}" class="nav-item {{ 'active' if active_page == 'relatorios' }}"><span>📋</span> Relatórios</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="{{ url_for('index') }}" class="nav-item"><span>🌐</span> Consulta Pública</a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-item" style="color:var(--danger);"><span>🚪</span> Sair</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-content">
+      <div class="mobile-header">
+        <button onclick="toggleSidebar()" class="btn btn-outline btn-sm">☰</button>
+        <span style="font-weight:700;">SaúdeAP</span>
+        <div style="width:32px;"></div>
+      </div>
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

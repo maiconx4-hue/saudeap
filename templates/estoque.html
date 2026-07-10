@@ -1,0 +1,397 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <h2 style="font-size:1.5rem;font-weight:700;">Estoque</h2>
+
+    <button class="btn btn-primary" onclick="openEstModal()">
+        + Novo Estoque
+    </button>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>UBS</th>
+                <th>Medicamento</th>
+                <th>Qtd</th>
+                <th>Lote</th>
+                <th>Validade</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+
+        <tbody id="estTable"></tbody>
+    </table>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="empty-state-icon">📦</div>
+        <h3>Nenhum estoque cadastrado</h3>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEst">
+
+    <div class="modal">
+
+        <div class="modal-header">
+            <h3 id="estModalTitle">Novo Estoque</h3>
+        </div>
+
+        <div class="modal-body">
+
+            <form onsubmit="saveEst(event)">
+
+                <input type="hidden" data-field="id">
+
+                <div class="form-group">
+                    <label class="form-label">UBS *</label>
+
+                    <select
+                        class="form-select"
+                        data-field="ubs_id"
+                        required>
+                    </select>
+                </div>
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Medicamento *
+                    </label>
+
+                    <select
+                        class="form-select"
+                        data-field="medicamento_id"
+                        required>
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Quantidade *
+                    </label>
+
+                    <input
+                        class="form-input"
+                        type="number"
+                        min="0"
+                        data-field="quantidade"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Lote
+                    </label>
+
+                    <input
+                        class="form-input"
+                        type="text"
+                        data-field="lote">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Validade
+                    </label>
+
+                    <input
+                        class="form-input"
+                        type="date"
+                        data-field="validade">
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        onclick="closeModal('modalEst')">
+
+                        Cancelar
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        Salvar
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+let ubsList = [];
+let medList = [];
+
+async function init(){
+
+    try{
+
+        [ubsList, medList] = await Promise.all([
+
+            api("/api/ubs/"),
+            api("/api/medicamentos/")
+
+        ]);
+
+        fillSelect(
+            '#modalEst [data-field="ubs_id"]',
+            ubsList,
+            "id",
+            "nome",
+            "Selecione a UBS"
+        );
+
+        fillSelect(
+            '#modalEst [data-field="medicamento_id"]',
+            medList,
+            "id",
+            "nome",
+            "Selecione o medicamento"
+        );
+
+        loadEst();
+
+    }
+
+    catch(e){
+
+        console.error(e);
+
+        showToast(
+            "Erro carregando dados.",
+            "error"
+        );
+
+    }
+
+}
+
+async function loadEst(){
+
+    const ests = await api("/api/estoques/");
+
+    document.getElementById("emptyState").style.display =
+        ests.length ? "none" : "block";
+
+    document.getElementById("estTable").innerHTML = ests.map(e=>{
+
+        const status = getEstoqueStatus(e.quantidade);
+
+        return `
+
+<tr>
+
+<td>${e.ubs_nome}</td>
+
+<td>${e.medicamento_nome}</td>
+
+<td>${e.quantidade}</td>
+
+<td>${e.lote || "-"}</td>
+
+<td>${formatDate(e.validade)}</td>
+
+<td>
+
+<span class="badge ${status.class}">
+${status.label}
+</span>
+
+</td>
+
+<td>
+
+<button class="btn btn-outline btn-sm"
+onclick='editEst(${JSON.stringify(e)})'>
+
+Editar
+
+</button>
+
+<button
+class="btn btn-danger btn-sm"
+onclick="delEst(${e.id})">
+
+Excluir
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+    }).join("");
+
+}
+
+function openEstModal(){
+
+    document.querySelector("#modalEst form").reset();
+
+    document.querySelector(
+        '#modalEst [data-field="id"]'
+    ).value="";
+
+    document.getElementById(
+        "estModalTitle"
+    ).textContent="Novo Estoque";
+
+    openModal("modalEst");
+
+}
+
+function editEst(e){
+
+    document.querySelector(
+        '#modalEst [data-field="id"]'
+    ).value=e.id;
+
+    document.querySelector(
+        '#modalEst [data-field="ubs_id"]'
+    ).value=e.ubs_id;
+
+    document.querySelector(
+        '#modalEst [data-field="medicamento_id"]'
+    ).value=e.medicamento_id;
+
+    document.querySelector(
+        '#modalEst [data-field="quantidade"]'
+    ).value=e.quantidade;
+
+    document.querySelector(
+        '#modalEst [data-field="lote"]'
+    ).value=e.lote || "";
+
+    document.querySelector(
+        '#modalEst [data-field="validade"]'
+    ).value=e.validade ?
+    e.validade.split("T")[0] : "";
+
+    document.getElementById(
+        "estModalTitle"
+    ).textContent="Editar Estoque";
+
+    openModal("modalEst");
+
+}
+
+async function saveEst(ev){
+
+    ev.preventDefault();
+
+    const id=document.querySelector(
+        '#modalEst [data-field="id"]'
+    ).value;
+
+    const data={
+
+        ubs_id:Number(
+            document.querySelector(
+            '#modalEst [data-field="ubs_id"]'
+            ).value
+        ),
+
+        medicamento_id:Number(
+            document.querySelector(
+            '#modalEst [data-field="medicamento_id"]'
+            ).value
+        ),
+
+        quantidade:Number(
+            document.querySelector(
+            '#modalEst [data-field="quantidade"]'
+            ).value
+        ),
+
+        lote:document.querySelector(
+            '#modalEst [data-field="lote"]'
+        ).value,
+
+        validade:document.querySelector(
+            '#modalEst [data-field="validade"]'
+        ).value || null
+
+    };
+
+    if(id){
+
+        await api(`/api/estoques/${id}`,{
+
+            method:"PUT",
+
+            body:JSON.stringify(data)
+
+        });
+
+    }
+
+    else{
+
+        await api("/api/estoques/",{
+
+            method:"POST",
+
+            body:JSON.stringify(data)
+
+        });
+
+    }
+
+    closeModal("modalEst");
+
+    showToast("Estoque salvo!");
+
+    loadEst();
+
+}
+
+async function delEst(id){
+
+    if(!confirmDelete("Excluir este estoque?")) return;
+
+    await api(`/api/estoques/${id}`,{
+
+        method:"DELETE"
+
+    });
+
+    showToast("Estoque removido!");
+
+    loadEst();
+
+}
+
+init();
+
+</script>
+
+{% endblock %}

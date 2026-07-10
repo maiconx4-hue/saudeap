@@ -1,0 +1,72 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Relatórios</h2>
+
+<div style="display:flex;gap:0.25rem;background:var(--primary-light);border-radius:0.75rem;padding:0.25rem;max-width:32rem;margin-bottom:1.5rem;">
+  <button onclick="setRelTab('baixo')" id="rel-baixo" class="tab-btn active">📦 Estoque Baixo</button>
+  <button onclick="setRelTab('vencido')" id="rel-vencido" class="tab-btn">🕐 Vencidos</button>
+  <button onclick="setRelTab('utilizacao')" id="rel-utilizacao" class="tab-btn">📊 Utilização</button>
+  <button onclick="setRelTab('historico')" id="rel-historico" class="tab-btn">📋 Histórico</button>
+</div>
+
+<div class="card">
+  <div id="relContent"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let relTab = 'baixo';
+let estsData = [], movsData = [];
+
+async function initRel() {
+  [estsData, movsData] = await Promise.all([api('/api/estoques/'), api('/api/movimentacoes/')]);
+  renderRel();
+}
+
+function setRelTab(tab) {
+  relTab = tab;
+  ['baixo','vencido','utilizacao','historico'].forEach(t => {
+    document.getElementById(`rel-${t}`).classList.toggle('active', t === tab);
+  });
+  renderRel();
+}
+
+function renderRel() {
+  const el = document.getElementById('relContent');
+  if (relTab === 'baixo') {
+    const baixo = estsData.filter(e => e.quantidade > 0 && e.quantidade <= 10);
+    el.innerHTML = renderTable(['Medicamento','UBS','Quantidade','Status'], baixo.map(e => {
+      const s = getEstoqueStatus(e.quantidade);
+      return [e.medicamento_nome, e.ubs_nome, e.quantidade, `<span class="badge ${s.class}">${s.label}</span>`];
+    }), 'Nenhum estoque baixo');
+  } else if (relTab === 'vencido') {
+    const vencidos = estsData.filter(e => e.validade && new Date(e.validade) < new Date());
+    el.innerHTML = renderTable(['Medicamento','UBS','Lote','Validade'], vencidos.map(e =>
+      [e.medicamento_nome, e.ubs_nome, e.lote || '-', `<span class="badge badge-danger">${formatDate(e.validade)}</span>`]
+    ), 'Nenhum medicamento vencido');
+  } else if (relTab === 'utilizacao') {
+    const uso = {};
+    movsData.filter(m => m.tipo === 'Saída').forEach(m => {
+      uso[m.medicamento_nome] = (uso[m.medicamento_nome] || 0) + m.quantidade;
+    });
+    const sorted = Object.entries(uso).sort((a,b) => b[1]-a[1]);
+    el.innerHTML = renderTable(['Medicamento','Total Saídas'], sorted.map(([nome, qtd]) => [nome, qtd]), 'Nenhuma saída registrada');
+  } else {
+    el.innerHTML = renderTable(['Tipo','Medicamento','UBS','Qtd','Responsável','Data'], movsData.map(m =>
+      [`<span class="badge ${m.tipo === 'Entrada' ? 'badge-info' : 'badge-danger'}">${m.tipo}</span>`,
+       m.medicamento_nome, m.ubs_nome, m.quantidade, m.responsavel || '-', formatDate(m.created_at)]
+    ), 'Nenhuma movimentação registrada');
+  }
+}
+
+function renderTable(headers, rows, emptyMsg) {
+  if (rows.length === 0) return `<div class="empty-state"><h3 style="font-weight:600;">${emptyMsg}</h3></div>`;
+  return `<table class="table"><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+initRel();
+</script>
+{% endblock %}

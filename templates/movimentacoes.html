@@ -1,0 +1,278 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <h2 style="font-size:1.5rem;font-weight:700;">Movimentações</h2>
+    <button class="btn btn-primary" onclick="openMovModal()">
+        + Nova Movimentação
+    </button>
+</div>
+
+<div class="card" style="margin-bottom:1rem;">
+    <select id="filterTipo" class="form-select" style="max-width:200px;" onchange="loadMov()">
+        <option value="">Todos</option>
+        <option value="Entrada">Entradas</option>
+        <option value="Saída">Saídas</option>
+    </select>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Medicamento</th>
+                <th>UBS</th>
+                <th>Qtd</th>
+                <th>Responsável</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+
+        <tbody id="movTable"></tbody>
+    </table>
+
+    <div id="emptyState" style="display:none;" class="empty-state">
+        <div class="empty-state-icon">🔄</div>
+        <h3 style="font-weight:600;">Nenhuma movimentação registrada</h3>
+    </div>
+</div>
+
+
+<div class="modal-overlay" id="modalMov">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 style="font-weight:600;">Nova Movimentação</h3>
+        </div>
+
+        <div class="modal-body">
+
+            <form onsubmit="saveMov(event)">
+
+                <div class="form-group">
+                    <label class="form-label">Estoque *</label>
+                    <select data-field="estoque_id" class="form-select" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipo *</label>
+
+                    <select data-field="tipo" class="form-select" required>
+                        <option value="Entrada">Entrada</option>
+                        <option value="Saída">Saída</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Quantidade *</label>
+                    <input type="number"
+                           min="1"
+                           data-field="quantidade"
+                           class="form-input"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Responsável</label>
+                    <input type="text"
+                           data-field="responsavel"
+                           class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observação</label>
+                    <textarea data-field="observacao"
+                              class="form-textarea"></textarea>
+                </div>
+
+                <div class="modal-footer" style="padding:0;border:none;">
+                    <button type="button"
+                            class="btn btn-outline"
+                            onclick="closeModal('modalMov')">
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Registrar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+async function loadMov(){
+
+    const tipo=document.getElementById("filterTipo").value;
+
+    const url=tipo
+        ? `/api/movimentacoes/?tipo=${encodeURIComponent(tipo)}`
+        : "/api/movimentacoes/";
+
+    const movs=await api(url);
+
+    document.getElementById("emptyState").style.display =
+        movs.length===0 ? "block":"none";
+
+    document.getElementById("movTable").innerHTML =
+        movs.map(m=>{
+
+            return `
+            <tr>
+
+                <td>
+                    <span class="badge ${m.tipo=="Entrada" ? "badge-info":"badge-danger"}">
+                        ${m.tipo=="Entrada" ? "📥":"📤"} ${m.tipo}
+                    </span>
+                </td>
+
+                <td><strong>${m.medicamento_nome || "-"}</strong></td>
+
+                <td>${m.ubs_nome || "-"}</td>
+
+                <td>${m.quantidade}</td>
+
+                <td>${m.responsavel || "-"}</td>
+
+                <td>${formatDate(m.created_at)}</td>
+
+                <td>
+
+                    <button
+                        class="btn btn-danger btn-sm"
+                        onclick="delMov(${m.id})">
+
+                        Excluir
+
+                    </button>
+
+                </td>
+
+            </tr>
+            `;
+
+        }).join("");
+
+}
+
+
+
+async function openMovModal(){
+
+    closeModal("modalMov");
+
+    document.querySelector("#modalMov form").reset();
+
+    const ests=await api("/api/estoques/");
+
+    const select=document.querySelector('#modalMov [data-field="estoque_id"]');
+
+    if(ests.length===0){
+
+        select.innerHTML="<option value=''>Nenhum estoque cadastrado</option>";
+
+        showToast(
+            "Cadastre um estoque antes de registrar movimentações.",
+            "error"
+        );
+
+    }else{
+
+        select.innerHTML=ests.map(e=>`
+
+            <option value="${e.id}">
+                ${e.ubs_nome} — ${e.medicamento_nome}
+                (Estoque: ${e.quantidade})
+            </option>
+
+        `).join("");
+
+    }
+
+    openModal("modalMov");
+
+}
+
+
+
+async function saveMov(ev){
+
+    ev.preventDefault();
+
+    const data={
+
+        estoque_id:parseInt(document.querySelector('#modalMov [data-field="estoque_id"]').value),
+
+        tipo:document.querySelector('#modalMov [data-field="tipo"]').value,
+
+        quantidade:parseInt(document.querySelector('#modalMov [data-field="quantidade"]').value),
+
+        responsavel:document.querySelector('#modalMov [data-field="responsavel"]').value,
+
+        observacao:document.querySelector('#modalMov [data-field="observacao"]').value
+
+    };
+
+    try{
+
+        await api("/api/movimentacoes/",{
+
+            method:"POST",
+
+            body:JSON.stringify(data)
+
+        });
+
+        closeModal("modalMov");
+
+        showToast("Movimentação registrada!");
+
+        await loadMov();
+
+    }
+
+    catch(err){
+
+        showToast("Erro ao registrar movimentação.","error");
+
+    }
+
+}
+
+
+
+async function delMov(id){
+
+    if(!confirmDelete("Deseja realmente excluir esta movimentação?")) return;
+
+    await api(`/api/movimentacoes/${id}`,{
+
+        method:"DELETE"
+
+    });
+
+    showToast("Movimentação removida!");
+
+    await loadMov();
+
+}
+
+
+
+loadMov();
+
+</script>
+
+{% endblock %}

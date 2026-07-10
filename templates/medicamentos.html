@@ -1,0 +1,109 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+  <h2 style="font-size:1.5rem;font-weight:700;">Medicamentos</h2>
+  <button class="btn btn-primary" onclick="openModal('modalMed')">+ Novo Medicamento</button>
+</div>
+
+<div class="card" style="margin-bottom:1rem;">
+  <input type="text" id="searchInput" class="form-input" placeholder="Buscar medicamento..." oninput="loadMed(this.value)">
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr><th>Nome</th><th>Princípio Ativo</th><th>Dosagem</th><th>Fabricante</th><th>Ações</th></tr>
+    </thead>
+    <tbody id="medTable"></tbody>
+  </table>
+  <div id="emptyState" style="display:none;" class="empty-state">
+    <div class="empty-state-icon">💊</div>
+    <h3 style="font-weight:600;">Nenhum medicamento cadastrado</h3>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalMed">
+  <div class="modal">
+    <div class="modal-header"><h3 style="font-weight:600;" id="modalTitle">Novo Medicamento</h3></div>
+    <div class="modal-body">
+      <form id="medForm" onsubmit="saveMed(event)">
+        <input type="hidden" data-field="id">
+        <div class="form-group"><label class="form-label">Nome *</label><input type="text" data-field="nome" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Princípio Ativo *</label><input type="text" data-field="principio_ativo" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Dosagem</label><input type="text" data-field="dosagem" class="form-input" placeholder="ex: 500mg"></div>
+        <div class="form-group"><label class="form-label">Fabricante</label><input type="text" data-field="fabricante" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Descrição</label><textarea data-field="descricao" class="form-textarea"></textarea></div>
+        <div class="modal-footer" style="padding:0;border:none;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalMed')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadMed(term = '') {
+  const url = term ? `/api/medicamentos/?q=${encodeURIComponent(term)}` : '/api/medicamentos/';
+  const meds = await api(url);
+  const tbody = document.getElementById('medTable');
+  document.getElementById('emptyState').style.display = meds.length === 0 ? 'block' : 'none';
+  tbody.innerHTML = meds.map(m => `
+    <tr>
+      <td style="font-weight:500;">${m.nome}</td>
+      <td>${m.principio_ativo || '-'}</td>
+      <td>${m.dosagem || '-'}</td>
+      <td>${m.fabricante || '-'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick='editMed(${JSON.stringify(m)})'>Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="delMed(${m.id})">Excluir</button>
+      </td>
+    </tr>`).join('');
+}
+
+function editMed(m) {
+  document.querySelector('[data-field="id"]').value = m.id;
+  document.querySelector('[data-field="nome"]').value = m.nome;
+  document.querySelector('[data-field="principio_ativo"]').value = m.principio_ativo || '';
+  document.querySelector('[data-field="dosagem"]').value = m.dosagem || '';
+  document.querySelector('[data-field="fabricante"]').value = m.fabricante || '';
+  document.querySelector('[data-field="descricao"]').value = m.descricao || '';
+  document.getElementById('modalTitle').textContent = 'Editar Medicamento';
+  openModal('modalMed');
+}
+
+async function saveMed(e) {
+  e.preventDefault();
+  const id = document.querySelector('[data-field="id"]').value;
+  const data = {
+    nome: document.querySelector('[data-field="nome"]').value,
+    principio_ativo: document.querySelector('[data-field="principio_ativo"]').value,
+    dosagem: document.querySelector('[data-field="dosagem"]').value,
+    fabricante: document.querySelector('[data-field="fabricante"]').value,
+    descricao: document.querySelector('[data-field="descricao"]').value,
+  };
+  if (id) {
+    await api(`/api/medicamentos/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    showToast('Medicamento atualizado!');
+  } else {
+    await api('/api/medicamentos/', { method: 'POST', body: JSON.stringify(data) });
+    showToast('Medicamento criado!');
+  }
+  closeModal('modalMed');
+  loadMed();
+}
+
+async function delMed(id) {
+  if (!confirmDelete('Remover este medicamento?')) return;
+  await api(`/api/medicamentos/${id}`, { method: 'DELETE' });
+  showToast('Medicamento removido!');
+  loadMed();
+}
+
+loadMed();
+</script>
+{% endblock %}

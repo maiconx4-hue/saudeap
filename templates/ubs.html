@@ -1,0 +1,110 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+  <h2 style="font-size:1.5rem;font-weight:700;">Unidades Básicas de Saúde</h2>
+  <button class="btn btn-primary" onclick="openModal('modalUBS')">+ Nova UBS</button>
+</div>
+
+<div class="card">
+  <div id="ubsGrid" style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));"></div>
+  <div id="emptyState" style="display:none;" class="empty-state">
+    <div class="empty-state-icon">🏥</div>
+    <h3 style="font-weight:600;">Nenhuma UBS cadastrada</h3>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalUBS">
+  <div class="modal">
+    <div class="modal-header"><h3 style="font-weight:600;" id="modalTitle">Nova UBS</h3></div>
+    <div class="modal-body">
+      <form id="ubsForm" onsubmit="saveUBS(event)">
+        <input type="hidden" data-field="id">
+        <div class="form-group"><label class="form-label">Nome *</label><input type="text" data-field="nome" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Endereço *</label><input type="text" data-field="endereco" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Bairro *</label><input type="text" data-field="bairro" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Cidade</label><input type="text" data-field="cidade" class="form-input" value="Macapá"></div>
+        <div class="form-group"><label class="form-label">Telefone</label><input type="text" data-field="telefone" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Horário de Funcionamento</label><input type="text" data-field="horario_funcionamento" class="form-input"></div>
+        <div style="display:flex;gap:1rem;">
+          <div class="form-group" style="flex:1;"><label class="form-label">Latitude</label><input type="number" step="any" data-field="latitude" class="form-input"></div>
+          <div class="form-group" style="flex:1;"><label class="form-label">Longitude</label><input type="number" step="any" data-field="longitude" class="form-input"></div>
+        </div>
+        <div class="modal-footer" style="padding:0;border:none;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalUBS')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadUBS() {
+  const ubs = await api('/api/ubs/');
+  const grid = document.getElementById('ubsGrid');
+  document.getElementById('emptyState').style.display = ubs.length === 0 ? 'block' : 'none';
+  grid.innerHTML = ubs.map(u => `
+    <div class="card card-hover">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="width:40px;height:40px;border-radius:0.75rem;background:var(--primary-light);display:flex;align-items:center;justify-content:center;">🏥</div>
+          <h3 style="font-weight:600;">${u.nome}</h3>
+        </div>
+      </div>
+      <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.75rem;">
+        <p>📍 ${u.endereco}, ${u.bairro}</p>
+        <p>🏙️ ${u.cidade || 'Macapá'}</p>
+        ${u.telefone ? `<p>📞 ${u.telefone}</p>` : ''}
+        ${u.horario_funcionamento ? `<p>🕐 ${u.horario_funcionamento}</p>` : ''}
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn btn-outline btn-sm" onclick='editUBS(${JSON.stringify(u)})'>Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="delUBS(${u.id})">Excluir</button>
+      </div>
+    </div>`).join('');
+}
+
+function editUBS(u) {
+  document.querySelector('#modalUBS [data-field="id"]').value = u.id;
+  ['nome','endereco','bairro','cidade','telefone','horario_funcionamento'].forEach(f => {
+    document.querySelector(`#modalUBS [data-field="${f}"]`).value = u[f] || '';
+  });
+  document.querySelector('#modalUBS [data-field="latitude"]').value = u.latitude || '';
+  document.querySelector('#modalUBS [data-field="longitude"]').value = u.longitude || '';
+  document.getElementById('modalTitle').textContent = 'Editar UBS';
+  openModal('modalUBS');
+}
+
+async function saveUBS(e) {
+  e.preventDefault();
+  const id = document.querySelector('#modalUBS [data-field="id"]').value;
+  const data = {};
+  ['nome','endereco','bairro','cidade','telefone','horario_funcionamento','latitude','longitude'].forEach(f => {
+    const val = document.querySelector(`#modalUBS [data-field="${f}"]`).value;
+    if (val) data[f] = f === 'latitude' || f === 'longitude' ? parseFloat(val) : val;
+  });
+  if (id) {
+    await api(`/api/ubs/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    showToast('UBS atualizada!');
+  } else {
+    await api('/api/ubs/', { method: 'POST', body: JSON.stringify(data) });
+    showToast('UBS criada!');
+  }
+  closeModal('modalUBS');
+  loadUBS();
+}
+
+async function delUBS(id) {
+  if (!confirmDelete('Remover esta UBS?')) return;
+  await api(`/api/ubs/${id}`, { method: 'DELETE' });
+  showToast('UBS removida!');
+  loadUBS();
+}
+
+loadUBS();
+</script>
+{% endblock %}
