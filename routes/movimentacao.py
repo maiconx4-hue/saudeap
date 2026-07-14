@@ -1,58 +1,162 @@
-"""CRUD de Movimentações — registra entradas e saídas, atualizando o estoque."""
+"""CRUD de Movimentações."""
+
 from flask import Blueprint, request, jsonify
+
 from models import Movimentacao, Estoque
 from extensions import db
+from database_utils import corrigir_sequence
+
 
 movimentacao_bp = Blueprint("movimentacao", __name__)
 
 
+# ==========================================================
+# LISTAR
+# ==========================================================
+
 @movimentacao_bp.route("/", methods=["GET"])
 def listar():
+
     tipo = request.args.get("tipo")
+
     query = Movimentacao.query
+
     if tipo:
         query = query.filter_by(tipo=tipo)
-    movs = query.order_by(Movimentacao.created_at.desc()).all()
-    return jsonify([m.to_dict() for m in movs])
 
+    movimentacoes = query.order_by(
+        Movimentacao.created_at.desc()
+    ).all()
+
+    return jsonify(
+        [m.to_dict() for m in movimentacoes]
+    )
+
+
+# ==========================================================
+# CRIAR
+# ==========================================================
 
 @movimentacao_bp.route("/", methods=["POST"])
 def criar():
+
     data = request.get_json()
+
+    if not data:
+
+        return jsonify({
+            "erro": "JSON inválido."
+        }), 400
+
     estoque_id = data.get("estoque_id")
-    tipo = data.get("tipo")  # "Entrada" ou "Saída"
+    tipo = data.get("tipo")
     quantidade = data.get("quantidade")
 
-    if not estoque_id or not tipo or quantidade is None:
-        return jsonify({"error": "estoque_id, tipo e quantidade são obrigatórios"}), 400
+    if not estoque_id:
 
-    est = Estoque.query.get_or_404(estoque_id)
+        return jsonify({
+            "erro": "estoque_id é obrigatório."
+        }), 400
 
-    if tipo == "Entrada":
-        est.quantidade += quantidade
-    elif tipo == "Saída":
-        if quantidade > est.quantidade:
-            return jsonify({"error": "Quantidade de saída maior que o estoque disponível"}), 400
-        est.quantidade -= quantidade
-    else:
-        return jsonify({"error": "tipo deve ser 'Entrada' ou 'Saída'"}), 400
+    if tipo not in ["Entrada", "Saída"]:
 
-    mov = Movimentacao(
-        estoque_id=estoque_id,
-        ubs_id=est.ubs_id,
-        tipo=tipo,
-        quantidade=quantidade,
-        responsavel=data.get("responsavel"),
-        observacao=data.get("observacao"),
-    )
-    db.session.add(mov)
-    db.session.commit()
-    return jsonify(mov.to_dict()), 201
+        return jsonify({
+            "erro": "Tipo deve ser Entrada ou Saída."
+        }), 400
 
+    if quantidade is None:
+
+        return jsonify({
+            "erro": "Quantidade é obrigatória."
+        }), 400
+
+    try:
+
+        estoque = Estoque.query.get_or_404(estoque_id)
+
+        # Corrige a sequence antes do INSERT
+        corrigir_sequence("movimentacoes")
+
+        # Atualiza o estoque
+
+        if tipo == "Entrada":
+
+            estoque.quantidade += quantidade
+
+        else:
+
+            if quantidade > estoque.quantidade:
+
+                return jsonify({
+
+                    "erro": "Quantidade maior que o estoque."
+
+                }), 400
+
+            estoque.quantidade -= quantidade
+
+        movimentacao = Movimentacao(
+
+            estoque_id=estoque.id,
+
+            ubs_id=estoque.ubs_id,
+
+            tipo=tipo,
+
+            quantidade=quantidade,
+
+            responsavel=data.get("responsavel"),
+
+            observacao=data.get("observacao")
+
+        )
+
+        db.session.add(movimentacao)
+
+        db.session.commit()
+
+        return jsonify(
+            movimentacao.to_dict()
+        ), 201
+
+    except Exception as erro:
+
+        db.session.rollback()
+
+        return jsonify({
+
+            "erro": str(erro)
+
+        }), 500
+
+
+# ==========================================================
+# DELETAR
+# ==========================================================
 
 @movimentacao_bp.route("/<int:mov_id>", methods=["DELETE"])
 def deletar(mov_id):
-    mov = Movimentacao.query.get_or_404(mov_id)
-    db.session.delete(mov)
-    db.session.commit()
-    return jsonify({"message": "Movimentação removida com sucesso"}), 200
+
+    movimentacao = Movimentacao.query.get_or_404(mov_id)
+
+    try:
+
+        db.session.delete(movimentacao)
+
+        db.session.commit()
+
+        return jsonify({
+
+            "message": "Movimentação removida com sucesso."
+
+        }), 200
+
+    except Exception as erro:
+
+        db.session.rollback()
+
+        return jsonify({
+
+            "erro": str(erro)
+
+        }), 500
