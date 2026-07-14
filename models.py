@@ -144,9 +144,13 @@ class Movimentacao(db.Model):
     )
 
     tipo = db.Column(
-        db.Enum("Entrada", "Saída"),
-        nullable=False
-    )
+    db.Enum(
+        "Entrada",
+        "Saída",
+        name="tipo_movimentacao"
+    ),
+    nullable=False
+)
 
     quantidade = db.Column(db.Integer, nullable=False)
 
