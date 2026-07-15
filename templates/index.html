@@ -103,18 +103,59 @@
           return;
         }
         el.innerHTML = `<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">` +
-          ubsList.map(u => `
-            <div class="card card-hover">
+        ubsList.map(u => `
+          <a href="/ubs/${u.id}"
+            style="text-decoration:none;color:inherit;display:block;">
+
+            <div class="card card-hover"
+                style="cursor:pointer;transition:.25s;">
+
               <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
-                <div style="width:40px;height:40px;border-radius:0.75rem;background:var(--primary-light);display:flex;align-items:center;justify-content:center;">🏥</div>
-                <h3 style="font-weight:600;">${u.nome}</h3>
+
+                <div style="
+                    width:40px;
+                    height:40px;
+                    border-radius:12px;
+                    background:var(--primary-light);
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                ">
+                    🏥
+                </div>
+
+                <h3 style="font-weight:600;">
+                    ${u.nome}
+                </h3>
+
               </div>
-              <div style="font-size:0.875rem;color:var(--text-muted);">
-                <p>📍 ${u.endereco}, ${u.bairro}</p>
-                ${u.telefone ? `<p>📞 ${u.telefone}</p>` : ''}
-                ${u.horario_funcionamento ? `<p>🕐 ${u.horario_funcionamento}</p>` : ''}
+
+              <div style="font-size:.875rem;color:var(--text-muted);">
+
+                  <p>📍 ${u.endereco}, ${u.bairro}</p>
+
+                  ${u.telefone ? `
+                      <p>📞 ${u.telefone}</p>
+                  ` : ""}
+
+                  ${u.horario_funcionamento ? `
+                      <p>🕐 ${u.horario_funcionamento}</p>
+                  ` : ""}
+
               </div>
-            </div>`).join('') + `</div>`;
+
+              <div style="
+                  margin-top:18px;
+                  color:#16a34a;
+                  font-weight:600;
+              ">
+                  Ver localização →
+              </div>
+
+            </div>
+
+          </a>
+        `).join('') + `</div>`;
       } else {
         el.innerHTML = `<div style="text-align:center;padding:3rem 1rem;">
           <div class="empty-state-icon">🔍</div>
