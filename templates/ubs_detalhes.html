@@ -1,17 +1,327 @@
-<div class="container mt-4">
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-    <h2>{{ ubs.nome }}</h2>
+<head>
 
-    <hr>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <p><strong>Endereço:</strong> {{ ubs.endereco }}</p>
+<title>{{ ubs.nome }}</title>
 
-    <p><strong>Bairro:</strong> {{ ubs.bairro }}</p>
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
-    <p><strong>Cidade:</strong> {{ ubs.cidade }}</p>
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/style.css') }}">
 
-    <p><strong>Telefone:</strong> {{ ubs.telefone or "Não informado" }}</p>
+<style>
 
-    <p><strong>Horário:</strong> {{ ubs.horario_funcionamento or "Não informado" }}</p>
+body{
+    background:#f4f7fb;
+    margin:0;
+    font-family:Inter,sans-serif;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:30px;
+}
+
+.card{
+
+    background:white;
+    border-radius:18px;
+    padding:25px;
+
+    box-shadow:
+    0 12px 30px rgba(0,0,0,.08);
+
+}
+
+.header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+
+}
+
+h1{
+
+margin:0;
+font-size:34px;
+
+}
+
+.info{
+
+margin-top:20px;
+line-height:32px;
+font-size:18px;
+
+}
+
+#map{
+
+height:420px;
+
+margin-top:30px;
+
+border-radius:18px;
+
+overflow:hidden;
+
+}
+
+.buttons{
+
+display:flex;
+
+gap:15px;
+
+margin-top:25px;
+
+flex-wrap:wrap;
+
+}
+
+.btn{
+
+padding:14px 22px;
+
+border-radius:12px;
+
+text-decoration:none;
+
+font-weight:bold;
+
+color:white;
+
+}
+
+.btn-green{
+
+background:#16a34a;
+
+}
+
+.btn-blue{
+
+background:#2563eb;
+
+}
+
+table{
+
+width:100%;
+
+margin-top:30px;
+
+border-collapse:collapse;
+
+}
+
+th{
+
+background:#16a34a;
+
+color:white;
+
+padding:12px;
+
+}
+
+td{
+
+padding:12px;
+
+border-bottom:1px solid #eee;
+
+}
+
+.status-baixo{
+
+color:red;
+font-weight:bold;
+
+}
+
+.status-ok{
+
+color:#16a34a;
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<div class="header">
+
+<div>
+
+<h1>🏥 {{ ubs.nome }}</h1>
+
+<div class="info">
+
+<div>📍 {{ ubs.endereco }}</div>
+
+<div>🏘 {{ ubs.bairro }}</div>
+
+<div>🏙 {{ ubs.cidade }}</div>
+
+<div>☎ {{ ubs.telefone }}</div>
+
+<div>🕒 {{ ubs.horario_funcionamento }}</div>
 
 </div>
+
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<a
+class="btn btn-green"
+target="_blank"
+href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ ubs.longitude }}">
+
+🧭 Como chegar
+
+</a>
+
+<a
+class="btn btn-blue"
+href="tel:{{ ubs.telefone }}">
+
+📞 Ligar
+
+</a>
+
+</div>
+
+
+<div id="map"></div>
+
+
+<h2 style="margin-top:40px;">
+
+💊 Medicamentos disponíveis
+
+</h2>
+
+<table>
+
+<tr>
+
+<th>Medicamento</th>
+
+<th>Quantidade</th>
+
+<th>Lote</th>
+
+<th>Validade</th>
+
+</tr>
+
+{% for estoque in ubs.estoques %}
+
+<tr>
+
+<td>{{ estoque.medicamento.nome }}</td>
+
+<td>
+
+{% if estoque.quantidade < 20 %}
+
+<span class="status-baixo">
+
+{{ estoque.quantidade }}
+
+</span>
+
+{% else %}
+
+<span class="status-ok">
+
+{{ estoque.quantidade }}
+
+</span>
+
+{% endif %}
+
+</td>
+
+<td>{{ estoque.lote }}</td>
+
+<td>{{ estoque.validade }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+const map=L.map('map').setView(
+
+[
+{{ ubs.latitude }},
+{{ ubs.longitude }}
+],
+
+16
+
+);
+
+L.tileLayer(
+
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+
+{
+
+attribution:'© OpenStreetMap'
+
+}
+
+).addTo(map);
+
+L.marker(
+
+[
+{{ ubs.latitude }},
+{{ ubs.longitude }}
+]
+
+)
+
+.addTo(map)
+
+.bindPopup("<b>{{ ubs.nome }}</b>")
+
+.openPopup();
+
+</script>
+
+</body>
+
+</html>
