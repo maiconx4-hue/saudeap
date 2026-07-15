@@ -179,6 +179,7 @@
         } else {
           el.innerHTML = `<p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem;">${results.length} medicamento(s) encontrado(s) para "${term}"</p>` +
             results.map(item => `
+              <a href="/ubs/${u.id}">
               <div class="card" style="margin-bottom:1rem;">
                 <div style="padding-bottom:1rem;border-bottom:1px solid var(--border);">
                   <div style="display:flex;justify-content:space-between;align-items:start;">
@@ -202,7 +203,7 @@
                     <span class="badge ${status.class}">${status.label}</span>
                   </div>`;
                 }).join('')}
-              </div>`).join('');
+              </div></a>`).join('');
         }
       } catch(e) {
         showToast('Erro ao buscar medicamentos', 'error');
