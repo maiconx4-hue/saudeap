@@ -3,6 +3,8 @@
 from datetime import datetime
 
 from flask import Blueprint, request, jsonify
+from decorators import exigir_jwt_admin
+from sqlalchemy.orm import selectinload
 
 from models import Estoque
 from extensions import db
@@ -10,6 +12,11 @@ from database_utils import corrigir_sequence
 
 
 estoque_bp = Blueprint("estoque", __name__)
+
+
+@estoque_bp.before_request
+def exigir_jwt():
+    exigir_jwt_admin()
 
 
 # ==========================================================
@@ -30,7 +37,10 @@ def listar():
     if med_id:
         query = query.filter_by(medicamento_id=med_id)
 
-    estoques = query.all()
+    estoques = query.options(
+        selectinload(Estoque.ubs),
+        selectinload(Estoque.medicamento),
+    ).all()
 
     return jsonify(
         [e.to_dict() for e in estoques]

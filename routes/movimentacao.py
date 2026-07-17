@@ -1,6 +1,8 @@
 """CRUD de Movimentações."""
 
 from flask import Blueprint, request, jsonify
+from decorators import exigir_jwt_admin
+from sqlalchemy.orm import selectinload
 
 from models import Movimentacao, Estoque
 from extensions import db
@@ -8,6 +10,11 @@ from database_utils import corrigir_sequence
 
 
 movimentacao_bp = Blueprint("movimentacao", __name__)
+
+
+@movimentacao_bp.before_request
+def exigir_jwt():
+    exigir_jwt_admin()
 
 
 # ==========================================================
@@ -18,15 +25,22 @@ movimentacao_bp = Blueprint("movimentacao", __name__)
 def listar():
 
     tipo = request.args.get("tipo")
+    limite = request.args.get("limit", type=int)
 
     query = Movimentacao.query
 
     if tipo:
         query = query.filter_by(tipo=tipo)
 
-    movimentacoes = query.order_by(
-        Movimentacao.created_at.desc()
-    ).all()
+    query = query.options(
+        selectinload(Movimentacao.estoque).selectinload(Estoque.ubs),
+        selectinload(Movimentacao.estoque).selectinload(Estoque.medicamento),
+    ).order_by(Movimentacao.created_at.desc())
+
+    if limite is not None:
+        query = query.limit(max(1, min(limite, 100)))
+
+    movimentacoes = query.all()
 
     return jsonify(
         [m.to_dict() for m in movimentacoes]

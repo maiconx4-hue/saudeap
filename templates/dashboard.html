@@ -37,8 +37,8 @@
 <script>
 async function loadDashboard() {
   const [ubs, meds, ests, movs] = await Promise.all([
-    api('/api/ubs'), api('/api/medicamentos'),
-    api('/api/estoques'), api('/api/movimentacoes')
+    api('/api/ubs/'), api('/api/medicamentos/'),
+    api('/api/estoques/'), api('/api/movimentacoes/?limit=5')
   ]);
 
   const totalQtd = ests.reduce((s, e) => s + (e.quantidade || 0), 0);

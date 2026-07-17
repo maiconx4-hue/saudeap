@@ -1,12 +1,18 @@
 """CRUD de Medicamentos."""
 
 from flask import Blueprint, request, jsonify
+from decorators import exigir_jwt_admin
 from sqlalchemy import or_, text
 
 from models import Medicamento
 from extensions import db
 
 medicamento_bp = Blueprint("medicamento", __name__)
+
+
+@medicamento_bp.before_request
+def exigir_jwt():
+    exigir_jwt_admin()
 
 
 # ==========================================================

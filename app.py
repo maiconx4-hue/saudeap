@@ -2,19 +2,21 @@ import os
 from flask import Flask, render_template
 from flask_cors import CORS
 
-from extensions import db
+from extensions import db, jwt
 from config import Config
 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    Config.validar_segredos()
 
     CORS(app)
     db.init_app(app)
+    jwt.init_app(app)
 
     # Importa os modelos
-    from models import UBS, Medicamento, Estoque, Movimentacao
+    from models import Usuario, UBS, Medicamento, Estoque, Movimentacao
 
 
 # ===========================

@@ -1,5 +1,30 @@
 from datetime import datetime
+from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
+
+
+class Usuario(db.Model):
+    """Usuário autenticável do painel administrativo e da API."""
+
+    __tablename__ = "usuarios"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), nullable=False, unique=True, index=True)
+    senha_hash = db.Column(db.String(255), nullable=False)
+    papel = db.Column(db.String(30), nullable=False, default="admin")
+    ativo = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def definir_senha(self, senha):
+        self.senha_hash = generate_password_hash(senha)
+
+    def verificar_senha(self, senha):
+        return check_password_hash(self.senha_hash, senha)
+
+    @property
+    def eh_admin(self):
+        return self.ativo and self.papel == "admin"
 
 
 class UBS(db.Model):

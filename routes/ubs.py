@@ -1,6 +1,7 @@
 """CRUD de Unidades Básicas de Saúde."""
 
 from flask import Blueprint, request, jsonify
+from decorators import exigir_jwt_admin
 
 from models import UBS
 from extensions import db
@@ -8,6 +9,11 @@ from database_utils import corrigir_sequence
 
 
 ubs_bp = Blueprint("ubs", __name__)
+
+
+@ubs_bp.before_request
+def exigir_jwt():
+    exigir_jwt_admin()
 
 
 # ==========================================================

@@ -2,9 +2,19 @@
 
 // --- Helpers ---
 async function api(url, options = {}) {
+  const { headers = {}, ...fetchOptions } = options;
+  const csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrf_access_token='))
+    ?.split('=')[1];
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
+    ...fetchOptions,
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(csrfToken ? { 'X-CSRF-TOKEN': decodeURIComponent(csrfToken) } : {}),
+      ...headers,
+    },
   });
   if (!res.ok) throw new Error(`Erro ${res.status}`);
   return res.json();
