@@ -35,6 +35,8 @@
         <div class="form-group"><label class="form-label">Dosagem</label><input type="text" data-field="dosagem" class="form-input" placeholder="ex: 500mg"></div>
         <div class="form-group"><label class="form-label">Fabricante</label><input type="text" data-field="fabricante" class="form-input"></div>
         <div class="form-group"><label class="form-label">Descrição</label><textarea data-field="descricao" class="form-textarea"></textarea></div>
+        <div class="form-group"><label>Estoque mínimo</label><input type="number" data-field="estoque_minimo" class="form-input" id="estoque_minimo" min="0" value="10"></div>
+        
         <div class="modal-footer" style="padding:0;border:none;">
           <button type="button" class="btn btn-outline" onclick="closeModal('modalMed')">Cancelar</button>
           <button type="submit" class="btn btn-primary">Salvar</button>
@@ -72,6 +74,7 @@ function editMed(m) {
   document.querySelector('[data-field="dosagem"]').value = m.dosagem || '';
   document.querySelector('[data-field="fabricante"]').value = m.fabricante || '';
   document.querySelector('[data-field="descricao"]').value = m.descricao || '';
+  document.querySelector('[data-field="estoque_minimo"]').value = m.estoque_minimo ?? 10;
   document.getElementById('modalTitle').textContent = 'Editar Medicamento';
   openModal('modalMed');
 }
@@ -85,6 +88,7 @@ async function saveMed(e) {
     dosagem: document.querySelector('[data-field="dosagem"]').value,
     fabricante: document.querySelector('[data-field="fabricante"]').value,
     descricao: document.querySelector('[data-field="descricao"]').value,
+    estoque_minimo: document.querySelector('[data-field="estoque_minimo"]').value
   };
   if (id) {
     await api(`/api/medicamentos/${id}`, { method: 'PUT', body: JSON.stringify(data) });

@@ -21,6 +21,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.inspection import inspect
 
 from models import (
+    Usuario,
     UBS,
     Medicamento,
     Estoque,
@@ -57,13 +58,23 @@ mysql = MySQLSession()
 # POSTGRES
 # ===========================================================
 
+#POSTGRES_URL = (
+#    f"postgresql+psycopg2://"
+#    f"{os.getenv('PG_USER')}:"
+#    f"{os.getenv('PG_PASSWORD')}@"
+#    f"{os.getenv('PG_HOST')}:"
+#    f"{os.getenv('PG_PORT')}/"
+#    f"{os.getenv('PG_DATABASE')}"
+#)
+
+#postgres_engine = create_engine(
+#    POSTGRES_URL,
+#    pool_pre_ping=True
+#)
+
 POSTGRES_URL = (
-    f"postgresql+psycopg2://"
-    f"{os.getenv('PG_USER')}:"
-    f"{os.getenv('PG_PASSWORD')}@"
-    f"{os.getenv('PG_HOST')}:"
-    f"{os.getenv('PG_PORT')}/"
-    f"{os.getenv('PG_DATABASE')}"
+    os.getenv("DATABASE_URL")
+    .replace("postgres://", "postgresql://")
 )
 
 postgres_engine = create_engine(
@@ -197,6 +208,7 @@ def corrigir_sequences():
         "medicamentos",
         "estoques",
         "movimentacoes"
+        ,"usuarios"
     ]
 
     for tabela in tabelas:
@@ -305,6 +317,13 @@ def sincronizar_generico(modelo, nome_tabela):
 def sincronizar_banco():
 
     relatorio = []
+
+    relatorio.append(
+        sincronizar_generico(
+            Usuario,
+            "Usuários"
+        )
+    )
 
     relatorio.append(
         sincronizar_generico(

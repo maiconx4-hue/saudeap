@@ -1,0 +1,37 @@
+{% extends "emails/layout.html" %}
+
+{% block content %}
+
+<h2>🚨 Estoque Zerado</h2>
+
+<p>
+
+Um medicamento ficou completamente indisponível.
+
+</p>
+
+<div class="critico">
+
+<b>Medicamento:</b> {{ medicamento }}<br>
+
+<b>UBS:</b> {{ ubs }}
+
+</div>
+
+<p>
+
+É necessária reposição imediata.
+
+</p>
+
+<p>
+
+<a class="botao" href="{{ sistema }}">
+
+Abrir SaúdeAP
+
+</a>
+
+</p>
+
+{% endblock %}

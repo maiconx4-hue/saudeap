@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    background:#f4f7fa;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.container{
+
+    max-width:700px;
+
+    margin:30px auto;
+
+    background:#ffffff;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+}
+
+.header{
+
+    background:#0F766E;
+
+    color:white;
+
+    padding:25px;
+
+    text-align:center;
+
+}
+
+.logo{
+
+    font-size:30px;
+
+    font-weight:bold;
+
+}
+
+.content{
+
+    padding:35px;
+
+    color:#444;
+
+    line-height:1.7;
+
+}
+
+.botao{
+
+    display:inline-block;
+
+    padding:14px 25px;
+
+    background:#0F766E;
+
+    color:white !important;
+
+    text-decoration:none;
+
+    border-radius:6px;
+
+    font-weight:bold;
+
+}
+
+.footer{
+
+    background:#f3f3f3;
+
+    padding:20px;
+
+    font-size:13px;
+
+    color:#666;
+
+    text-align:center;
+
+}
+
+.alerta{
+
+    padding:15px;
+
+    border-left:5px solid #f59e0b;
+
+    background:#fff7ed;
+
+    margin:20px 0;
+
+}
+
+.critico{
+
+    padding:15px;
+
+    border-left:5px solid #dc2626;
+
+    background:#fef2f2;
+
+    margin:20px 0;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<div class="logo">
+
+🏥 SaúdeAP
+
+</div>
+
+<div>
+
+Sistema Inteligente de Gestão de Medicamentos
+
+</div>
+
+</div>
+
+<div class="content">
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+<div class="footer">
+
+Este é um e-mail automático.<br>
+
+Secretaria Municipal de Saúde de Macapá<br>
+
+SaúdeAP © {{ ano }}
+
+</div>
+
+</div>
+
+</body>
+</html>

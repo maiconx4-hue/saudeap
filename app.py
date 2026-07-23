@@ -4,7 +4,9 @@ from flask_cors import CORS
 
 from extensions import db, jwt
 from config import Config
+from extensions import mail
 
+from schema import criar_ou_atualizar_estrutura
 
 def create_app():
     app = Flask(__name__)
@@ -13,7 +15,8 @@ def create_app():
 
     CORS(app)
     db.init_app(app)
-    jwt.init_app(app)
+    jwt.init_app(app)    
+    mail.init_app(app)
 
     # Importa os modelos
     from models import Usuario, UBS, Medicamento, Estoque, Movimentacao
@@ -34,13 +37,19 @@ def create_app():
     from routes.medicamento import medicamento_bp
     from routes.estoque import estoque_bp
     from routes.movimentacao import movimentacao_bp
+    from routes.admin_users import admin_users_bp
+    from routes.usuarios import usuarios_bp
+
+
 
     app.register_blueprint(publico_bp)
     app.register_blueprint(ubs_bp, url_prefix="/api/ubs")
     app.register_blueprint(medicamento_bp, url_prefix="/api/medicamentos")
     app.register_blueprint(estoque_bp, url_prefix="/api/estoques")
     app.register_blueprint(movimentacao_bp, url_prefix="/api/movimentacoes")
-
+    app.register_blueprint(admin_users_bp)
+    app.register_blueprint(usuarios_bp)
+    
     # ===========================
     # Página pública
     # ===========================
@@ -64,6 +73,7 @@ def create_app():
     # Criação automática das tabelas
     # ===========================
     with app.app_context():
+        criar_ou_atualizar_estrutura()
         try:
             db.create_all()
             print("✅ Banco conectado com sucesso.")

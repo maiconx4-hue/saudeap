@@ -110,7 +110,9 @@ def criar():
 
             fabricante=data.get("fabricante"),
 
-            descricao=data.get("descricao")
+            descricao=data.get("descricao"),
+
+            estoque_minimo=data.get("estoque_minimo", 10)
 
         )
 
@@ -145,7 +147,8 @@ def atualizar(med_id):
         "principio_ativo",
         "dosagem",
         "fabricante",
-        "descricao"
+        "descricao",
+        "estoque_minimo"
     ]:
 
         if campo in data:

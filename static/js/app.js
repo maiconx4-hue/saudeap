@@ -61,9 +61,9 @@ function formatDate(dateStr) {
 }
 
 // --- Status do estoque ---
-function getEstoqueStatus(quantidade) {
-  if (quantidade <= 0) return { class: 'badge-danger', label: 'Indisponível' };
-  if (quantidade <= 10) return { class: 'badge-warning', label: `${quantidade} unid.` };
+function getEstoqueStatus(quantidade, minimo = 10) {
+  if (quantidade <= 0) return { class: 'badge-danger', label: `Sem Estoque` };
+  if (quantidade <= minimo) return { class: 'badge-warning', label: `Estoque Baixo` };
   return { class: 'badge-success', label: 'Disponível' };
 }
 

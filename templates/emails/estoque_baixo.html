@@ -1,0 +1,41 @@
+{% extends "emails/layout.html" %}
+
+{% block content %}
+
+<h2>⚠️ Estoque Baixo</h2>
+
+<p>
+
+Foi identificado um medicamento abaixo do estoque mínimo.
+
+</p>
+
+<div class="alerta">
+
+<b>Medicamento:</b> {{ medicamento }}<br>
+
+<b>UBS:</b> {{ ubs }}<br>
+
+<b>Quantidade:</b> {{ quantidade }}<br>
+
+<b>Estoque mínimo:</b> {{ minimo }}
+
+</div>
+
+<p>
+
+Recomendamos realizar a reposição o quanto antes.
+
+</p>
+
+<p>
+
+<a class="botao" href="{{ sistema }}">
+
+Abrir SaúdeAP
+
+</a>
+
+</p>
+
+{% endblock %}

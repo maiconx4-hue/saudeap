@@ -1,5 +1,10 @@
 import os
 from datetime import timedelta
+
+from flask_mail import Mail
+
+mail = Mail()
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,6 +25,9 @@ class Config:
     if os.getenv("DATABASE_URL"):
 
         database_url = os.getenv("DATABASE_URL")
+
+        
+        print("✅ PostgreSQL Neon conectado")
 
         # Compatibilidade SQLAlchemy
         if database_url.startswith("postgres://"):
@@ -47,6 +55,7 @@ class Config:
             f"{os.getenv('DB_PORT')}/"
             f"{os.getenv('DB_NAME')}"
         )
+        print("✅ MySQL Local conectado!")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -55,3 +64,21 @@ class Config:
         ausentes = [nome for nome in ("SECRET_KEY", "JWT_SECRET_KEY") if not getattr(cls, nome)]
         if ausentes:
             raise RuntimeError("Configure as variáveis de ambiente obrigatórias: " + ", ".join(ausentes))
+
+
+
+    #URL_SISTEMA = "http://localhost:5000"
+    URL_SISTEMA = "https://saudeap.onrender.com"
+
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = int(os.getenv("MAIL_PORT"))
+
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER")
+
+

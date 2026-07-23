@@ -1,6 +1,15 @@
 from datetime import datetime
+from enum import Enum
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
+
+
+class PerfilUsuario(str, Enum):
+    ADMINISTRADOR = "Administrador"
+    GESTOR = "Gestor"
+    FARMACEUTICO = "Farmaceutico"
+    ATENDENTE = "Atendente"
+    CONSULTA = "Consulta"
 
 
 class Usuario(db.Model):
@@ -9,9 +18,27 @@ class Usuario(db.Model):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(255), nullable=False, unique=True, index=True)
+
+    nome = db.Column(
+        db.String(150),
+        nullable=False
+    )
+
+    email = db.Column(
+        db.String(255),
+        nullable=False,
+        unique=True,
+        index=True
+    )
+    
     senha_hash = db.Column(db.String(255), nullable=False)
     papel = db.Column(db.String(30), nullable=False, default="admin")
+    # ``papel`` é mantido por compatibilidade com o JWT e o seed existentes.
+    perfil = db.Column(
+    db.String(30),
+    nullable=False,
+    default=PerfilUsuario.ADMINISTRADOR.value
+    )
     ativo = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -24,7 +51,40 @@ class Usuario(db.Model):
 
     @property
     def eh_admin(self):
-        return self.ativo and self.papel == "admin"
+        return self.ativo and (
+            self.papel == "admin"
+            or self.perfil == PerfilUsuario.ADMINISTRADOR.value
+        )
+
+class Sessao(db.Model):
+    __tablename__ = "sessoes"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False, index=True)
+    # O valor persistido é a impressão SHA-256 do token, nunca o JWT em texto puro.
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    ip = db.Column(db.String(64))
+    user_agent = db.Column(db.String(512))
+    inicio = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    ultimo_ping = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    fim = db.Column(db.DateTime)
+    ativa = db.Column(db.Boolean, nullable=False, default=True, index=True)
+
+    usuario = db.relationship("Usuario", backref=db.backref("sessoes", lazy=True))
+
+
+class LogAuditoria(db.Model):
+    __tablename__ = "logs_auditoria"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True, index=True)
+    acao = db.Column(db.String(20), nullable=False)
+    tabela = db.Column(db.String(100), nullable=False)
+    registro_id = db.Column(db.Integer)
+    ip = db.Column(db.String(64))
+    user_agent = db.Column(db.String(512))
+    data_hora = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    detalhes = db.Column(db.Text)
 
 
 class UBS(db.Model):
@@ -42,6 +102,9 @@ class UBS(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    updated_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    deleted_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
 
     estoques = db.relationship(
         "Estoque",
@@ -82,7 +145,15 @@ class Medicamento(db.Model):
     dosagem = db.Column(db.String(50))
     fabricante = db.Column(db.String(200))
     descricao = db.Column(db.Text)
+    estoque_minimo = db.Column(
+    db.Integer,
+    nullable=False,
+    default=10
+    )
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    updated_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    deleted_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
 
     estoques = db.relationship(
         "Estoque",
@@ -99,6 +170,7 @@ class Medicamento(db.Model):
             "dosagem": self.dosagem,
             "fabricante": self.fabricante,
             "descricao": self.descricao,
+            "estoque_minimo": self.estoque_minimo or 10
         }
 
 
@@ -121,10 +193,25 @@ class Estoque(db.Model):
         nullable=False
     )
 
+    alerta_baixo_enviado = db.Column(
+    db.Boolean,
+    nullable=False,
+    default=False
+    )
+
+    alerta_zero_enviado = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False
+    )
+
     quantidade = db.Column(db.Integer, nullable=False, default=0)
     lote = db.Column(db.String(100))
     validade = db.Column(db.Date)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    updated_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    deleted_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
 
     movimentacoes = db.relationship(
         "Movimentacao",
@@ -142,6 +229,12 @@ class Estoque(db.Model):
 
             "medicamento_id": self.medicamento_id,
             "medicamento_nome": self.medicamento.nome if self.medicamento else None,
+
+            "estoque_minimo": (
+                self.medicamento.estoque_minimo
+                if self.medicamento
+                else 10
+            ),
 
             "quantidade": self.quantidade,
             "lote": self.lote,
@@ -187,6 +280,9 @@ class Movimentacao(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+    created_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    updated_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
+    deleted_by = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
 
     def to_dict(self):
         return {
@@ -199,6 +295,12 @@ class Movimentacao(db.Model):
 
             "medicamento_id": self.estoque.medicamento.id if self.estoque and self.estoque.medicamento else None,
             "medicamento_nome": self.estoque.medicamento.nome if self.estoque and self.estoque.medicamento else None,
+
+            "estoque_minimo": (
+                self.estoque.medicamento.estoque_minimo
+                if self.estoque and self.estoque.medicamento
+                else 10
+            ),
 
             "tipo": self.tipo,
             "quantidade": self.quantidade,

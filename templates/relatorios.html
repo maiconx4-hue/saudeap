@@ -36,9 +36,9 @@ function setRelTab(tab) {
 function renderRel() {
   const el = document.getElementById('relContent');
   if (relTab === 'baixo') {
-    const baixo = estsData.filter(e => e.quantidade > 0 && e.quantidade <= 10);
+    const baixo = estsData.filter(e => e.quantidade >= 0 && e.quantidade <= (e.estoque_minimo ?? 10));
     el.innerHTML = renderTable(['Medicamento','UBS','Quantidade','Status'], baixo.map(e => {
-      const s = getEstoqueStatus(e.quantidade);
+      const s = getEstoqueStatus(e.quantidade, e.estoque_minimo);
       return [e.medicamento_nome, e.ubs_nome, e.quantidade, `<span class="badge ${s.class}">${s.label}</span>`];
     }), 'Nenhum estoque baixo');
   } else if (relTab === 'vencido') {
