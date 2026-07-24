@@ -59,6 +59,11 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+    }
+
     @classmethod
     def validar_segredos(cls):
         ausentes = [nome for nome in ("SECRET_KEY", "JWT_SECRET_KEY") if not getattr(cls, nome)]

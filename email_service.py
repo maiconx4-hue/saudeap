@@ -12,19 +12,17 @@ def enviar_email(
     template,
     **contexto
 ):
-
-    print("1 - Entrou enviar_email")
+    """
+    Envia um e-mail HTML utilizando os templates
+    da pasta templates/emails.
+    """
 
     contexto["ano"] = datetime.now().year
-
-    print("2 - Renderizando HTML")
 
     html = render_template(
         template,
         **contexto
     )
-
-    print("3 - Criando Message")
 
     msg = Message(
         subject=assunto,
@@ -32,11 +30,7 @@ def enviar_email(
         html=html
     )
 
-    print("4 - Vai enviar email")
-
     mail.send(msg)
-
-    print("5 - Email enviado")
 
 
 def enviar_alerta_estoque_baixo(
@@ -77,11 +71,9 @@ def enviar_alerta_estoque_zero(
 
 def emails_administradores():
 
-    usuarios = Usuario.query.all()
+    administradores = Usuario.query.filter(
+        Usuario.ativo == True,
+        Usuario.perfil == PerfilUsuario.ADMINISTRADOR.value
+    ).all()
 
-    for u in usuarios:
-        print("EMAIL:", u.email)
-        print("PERFIL:", u.perfil)
-        print("ATIVO:", u.ativo)
-
-    return [u.email for u in usuarios]
+    return [u.email for u in administradores]
