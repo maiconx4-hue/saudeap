@@ -42,9 +42,14 @@ async function loadDashboard() {
   ]);
 
   const totalQtd = ests.reduce((s, e) => s + (e.quantidade || 0), 0);
-  const baixo = ests.filter(
-    e => e.quantidade <= e.estoque_minimo && e.quantidade > 0
-  );
+  const baixo = ests.filter(e => {
+
+    const minimo = e.estoque_minimo || 10;
+
+    return e.quantidade > 0 &&
+           e.quantidade <= minimo;
+
+  });
   const indisponivel = ests.filter(e => e.quantidade <= 0);
   const vencidos = ests.filter(e => {
     if (!e.validade) return false;
