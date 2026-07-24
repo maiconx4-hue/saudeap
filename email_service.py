@@ -49,6 +49,14 @@ def enviar_email(
             html=html
         )
 
+        import socket
+
+        print("Resolvendo smtp.gmail.com...")
+
+        print(socket.gethostbyname("smtp.gmail.com"))
+
+        print("DNS OK")
+
         print("Objeto Message criado")
 
         print("Abrindo conexão SMTP...")
