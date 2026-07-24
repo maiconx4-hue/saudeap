@@ -83,7 +83,7 @@ class Config:
     # URL
     # ==========================================
     #URL_SISTEMA = "http://localhost:5000"
-    URL_SISTEMA = "https://saudeap.onrender.com"
+    RL_SISTEMA = "https://saudeap.onrender.com"
 
     # ==========================================
     # FLASK MAIL
