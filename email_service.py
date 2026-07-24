@@ -4,7 +4,7 @@ from flask import render_template, current_app
 from flask_mail import Message
 
 from extensions import mail
-from models import Usuario, PerfilUsuario
+from models import Usuario
 
 
 def enviar_email(
@@ -31,13 +31,15 @@ def enviar_email(
 
         print("Template renderizado com sucesso")
 
-        print("Servidor SMTP:", current_app.config["MAIL_SERVER"])
+        print("\n===== CONFIG SMTP =====")
+        print("Servidor:", current_app.config["MAIL_SERVER"])
         print("Porta:", current_app.config["MAIL_PORT"])
         print("Usuário:", current_app.config["MAIL_USERNAME"])
         print("Remetente:", current_app.config["MAIL_DEFAULT_SENDER"])
         print("TLS:", current_app.config["MAIL_USE_TLS"])
         print("SSL:", current_app.config["MAIL_USE_SSL"])
         print("Senha existe?:", bool(current_app.config["MAIL_PASSWORD"]))
+        print("=======================\n")
 
         print("Destinatários:", destinatarios)
 
@@ -49,17 +51,26 @@ def enviar_email(
 
         print("Objeto Message criado")
 
-        print("Conectando ao servidor SMTP...")
+        print("Abrindo conexão SMTP...")
 
-        mail.send(msg)
+        with mail.connect() as conn:
 
+            print("Conexão aberta!")
+
+            print("Enviando mensagem...")
+
+            conn.send(msg)
+
+            print("Mensagem enviada!")
+
+        print("Conexão encerrada")
         print("EMAIL ENVIADO COM SUCESSO!")
 
     except Exception as e:
 
         print("\n######## ERRO NO ENVIO ########")
         print("Tipo:", type(e).__name__)
-        print("Mensagem:", str(e))
+        print("Mensagem:", repr(e))
         print("###############################\n")
 
         raise
@@ -124,13 +135,14 @@ def emails_administradores():
         )
 
     administradores = Usuario.query.filter(
-    Usuario.ativo == True,
-    Usuario.perfil == "ADMINISTRADOR"
+        Usuario.ativo == True,
+        Usuario.perfil == "ADMINISTRADOR"
     ).all()
-
-    print("ADMINISTRADORES:", len(administradores))
 
     print("\n======= ADMINISTRADORES =======")
     print("Quantidade encontrada:", len(administradores))
+
+    for a in administradores:
+        print(a.email)
 
     return [u.email for u in administradores]
