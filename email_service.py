@@ -71,9 +71,11 @@ def enviar_alerta_estoque_zero(
 
 def emails_administradores():
 
-    administradores = Usuario.query.filter(
-        Usuario.ativo == True,
-        Usuario.perfil == PerfilUsuario.ADMINISTRADOR.value
-    ).all()
+    usuarios = Usuario.query.all()
 
-    return [u.email for u in administradores]
+    for u in usuarios:
+        print("EMAIL:", u.email)
+        print("PERFIL:", u.perfil)
+        print("ATIVO:", u.ativo)
+
+    return [u.email for u in usuarios]
