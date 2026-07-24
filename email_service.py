@@ -124,9 +124,11 @@ def emails_administradores():
         )
 
     administradores = Usuario.query.filter(
-        Usuario.ativo == True,
-        Usuario.perfil == PerfilUsuario.ADMINISTRADOR.value
+    Usuario.ativo == True,
+    Usuario.perfil == "ADMINISTRADOR"
     ).all()
+
+    print("ADMINISTRADORES:", len(administradores))
 
     print("\n======= ADMINISTRADORES =======")
     print("Quantidade encontrada:", len(administradores))
