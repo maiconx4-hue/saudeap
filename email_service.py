@@ -109,21 +109,26 @@ def enviar_alerta_estoque_zero(
 
 def emails_administradores():
 
-    print("\n===== BUSCANDO ADMINISTRADORES =====")
+    print("\n======= TODOS OS USUÁRIOS =======")
+
+    usuarios = Usuario.query.all()
+
+    print("Quantidade total:", len(usuarios))
+
+    for u in usuarios:
+        print(
+            f"ID={u.id} | "
+            f"EMAIL={u.email} | "
+            f"ATIVO={u.ativo} ({type(u.ativo)}) | "
+            f"PERFIL={u.perfil} ({type(u.perfil)})"
+        )
 
     administradores = Usuario.query.filter(
         Usuario.ativo == True,
         Usuario.perfil == PerfilUsuario.ADMINISTRADOR.value
     ).all()
 
+    print("\n======= ADMINISTRADORES =======")
     print("Quantidade encontrada:", len(administradores))
-
-    for admin in administradores:
-        print(
-            f"ID={admin.id} | "
-            f"EMAIL={admin.email} | "
-            f"ATIVO={admin.ativo} | "
-            f"PERFIL={admin.perfil}"
-        )
 
     return [u.email for u in administradores]
