@@ -12,25 +12,38 @@ def enviar_email(
     template,
     **contexto
 ):
-    """
-    Envia um e-mail HTML utilizando os templates
-    da pasta templates/emails.
-    """
+    try:
+        contexto["ano"] = datetime.now().year
 
-    contexto["ano"] = datetime.now().year
+        html = render_template(
+            template,
+            **contexto
+        )
 
-    html = render_template(
-        template,
-        **contexto
-    )
+        print("========== EMAIL ==========")
+        print("Assunto:", assunto)
+        print("Destinatários:", destinatarios)
+        print("Servidor:", mail.state.app.config["MAIL_SERVER"])
+        print("Usuário:", mail.state.app.config["MAIL_USERNAME"])
+        print("TLS:", mail.state.app.config["MAIL_USE_TLS"])
 
-    msg = Message(
-        subject=assunto,
-        recipients=destinatarios,
-        html=html
-    )
+        msg = Message(
+            subject=assunto,
+            recipients=destinatarios,
+            html=html
+        )
 
-    mail.send(msg)
+        print("Conectando ao Gmail...")
+
+        mail.send(msg)
+
+        print("EMAIL ENVIADO COM SUCESSO!")
+
+    except Exception as e:
+        print("ERRO AO ENVIAR EMAIL")
+        print(type(e).__name__)
+        print(str(e))
+        raise
 
 
 def enviar_alerta_estoque_baixo(
