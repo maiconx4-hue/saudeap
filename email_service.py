@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from flask import render_template
+from flask import render_template, current_app
 from flask_mail import Message
 
 from extensions import mail
 from models import Usuario, PerfilUsuario
+
 
 def enviar_email(
     assunto,
@@ -12,20 +13,33 @@ def enviar_email(
     template,
     **contexto
 ):
+
+    print("\n==============================")
+    print("INÍCIO DO ENVIO DE EMAIL")
+    print("==============================")
+
     try:
+
         contexto["ano"] = datetime.now().year
+
+        print("Template:", template)
 
         html = render_template(
             template,
             **contexto
         )
 
-        print("========== EMAIL ==========")
-        print("Assunto:", assunto)
+        print("Template renderizado com sucesso")
+
+        print("Servidor SMTP:", current_app.config["MAIL_SERVER"])
+        print("Porta:", current_app.config["MAIL_PORT"])
+        print("Usuário:", current_app.config["MAIL_USERNAME"])
+        print("Remetente:", current_app.config["MAIL_DEFAULT_SENDER"])
+        print("TLS:", current_app.config["MAIL_USE_TLS"])
+        print("SSL:", current_app.config["MAIL_USE_SSL"])
+        print("Senha existe?:", bool(current_app.config["MAIL_PASSWORD"]))
+
         print("Destinatários:", destinatarios)
-        print("Servidor:", mail.state.app.config["MAIL_SERVER"])
-        print("Usuário:", mail.state.app.config["MAIL_USERNAME"])
-        print("TLS:", mail.state.app.config["MAIL_USE_TLS"])
 
         msg = Message(
             subject=assunto,
@@ -33,16 +47,21 @@ def enviar_email(
             html=html
         )
 
-        print("Conectando ao Gmail...")
+        print("Objeto Message criado")
+
+        print("Conectando ao servidor SMTP...")
 
         mail.send(msg)
 
         print("EMAIL ENVIADO COM SUCESSO!")
 
     except Exception as e:
-        print("ERRO AO ENVIAR EMAIL")
-        print(type(e).__name__)
-        print(str(e))
+
+        print("\n######## ERRO NO ENVIO ########")
+        print("Tipo:", type(e).__name__)
+        print("Mensagem:", str(e))
+        print("###############################\n")
+
         raise
 
 
@@ -54,6 +73,9 @@ def enviar_alerta_estoque_baixo(
     minimo,
     sistema
 ):
+
+    print("Chamando enviar_alerta_estoque_baixo()")
+
     enviar_email(
         assunto="⚠️ SaúdeAP - Estoque Baixo",
         destinatarios=destinatarios,
@@ -72,6 +94,9 @@ def enviar_alerta_estoque_zero(
     ubs,
     sistema
 ):
+
+    print("Chamando enviar_alerta_estoque_zero()")
+
     enviar_email(
         assunto="🚨 SaúdeAP - Estoque Zerado",
         destinatarios=destinatarios,
@@ -84,9 +109,21 @@ def enviar_alerta_estoque_zero(
 
 def emails_administradores():
 
+    print("\n===== BUSCANDO ADMINISTRADORES =====")
+
     administradores = Usuario.query.filter(
         Usuario.ativo == True,
         Usuario.perfil == PerfilUsuario.ADMINISTRADOR.value
     ).all()
+
+    print("Quantidade encontrada:", len(administradores))
+
+    for admin in administradores:
+        print(
+            f"ID={admin.id} | "
+            f"EMAIL={admin.email} | "
+            f"ATIVO={admin.ativo} | "
+            f"PERFIL={admin.perfil}"
+        )
 
     return [u.email for u in administradores]
