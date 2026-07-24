@@ -61,6 +61,24 @@ def enviar_email(
 
         print("Abrindo conexão SMTP...")
 
+        import socket
+
+        print("Testando conexão TCP...")
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
+
+        try:
+            s.connect(("smtp.gmail.com", 587))
+            print("TCP OK")
+        except Exception as e:
+            print("TCP ERRO:", e)
+        finally:
+            s.close()
+
+
+
+
         with mail.connect() as conn:
 
             print("Conexão aberta!")
