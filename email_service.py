@@ -12,17 +12,19 @@ def enviar_email(
     template,
     **contexto
 ):
-    """
-    Envia um e-mail HTML utilizando os templates
-    da pasta templates/emails.
-    """
+
+    print("1 - Entrou enviar_email")
 
     contexto["ano"] = datetime.now().year
+
+    print("2 - Renderizando HTML")
 
     html = render_template(
         template,
         **contexto
     )
+
+    print("3 - Criando Message")
 
     msg = Message(
         subject=assunto,
@@ -30,7 +32,11 @@ def enviar_email(
         html=html
     )
 
+    print("4 - Vai enviar email")
+
     mail.send(msg)
+
+    print("5 - Email enviado")
 
 
 def enviar_alerta_estoque_baixo(
