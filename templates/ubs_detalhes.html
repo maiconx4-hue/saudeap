@@ -32,130 +32,104 @@ body{
 }
 
 .card{
-
     background:white;
     border-radius:18px;
     padding:25px;
-
-    box-shadow:
-    0 12px 30px rgba(0,0,0,.08);
-
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
 }
 
 .header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
 }
 
 h1{
-
-margin:0;
-font-size:34px;
-
+    margin:0;
+    font-size:34px;
+    color:#166534;
 }
 
 .info{
+    margin-top:20px;
+    line-height:32px;
+    font-size:18px;
+}
 
-margin-top:20px;
-line-height:32px;
-font-size:18px;
-
+.info i{
+    width:28px;
+    color:#16a34a;
 }
 
 #map{
-
-height:420px;
-
-margin-top:30px;
-
-border-radius:18px;
-
-overflow:hidden;
-
+    height:420px;
+    margin-top:30px;
+    border-radius:18px;
+    overflow:hidden;
 }
 
 .buttons{
-
-display:flex;
-
-gap:15px;
-
-margin-top:25px;
-
-flex-wrap:wrap;
-
+    display:flex;
+    gap:15px;
+    margin-top:25px;
+    flex-wrap:wrap;
 }
 
 .btn{
+    padding:14px 22px;
+    border-radius:12px;
+    text-decoration:none;
+    font-weight:bold;
+    color:white;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    transition:.2s;
+}
 
-padding:14px 22px;
-
-border-radius:12px;
-
-text-decoration:none;
-
-font-weight:bold;
-
-color:white;
-
+.btn:hover{
+    transform:translateY(-2px);
+    opacity:.92;
 }
 
 .btn-green{
-
-background:#16a34a;
-
+    background:#16a34a;
 }
 
 .btn-blue{
-
-background:#2563eb;
-
+    background:#2563eb;
 }
 
 table{
-
-width:100%;
-
-margin-top:30px;
-
-border-collapse:collapse;
-
+    width:100%;
+    margin-top:30px;
+    border-collapse:collapse;
 }
 
 th{
-
-background:#16a34a;
-
-color:white;
-
-padding:12px;
-
+    background:#16a34a;
+    color:white;
+    padding:12px;
 }
 
 td{
-
-padding:12px;
-
-border-bottom:1px solid #eee;
-
+    padding:12px;
+    border-bottom:1px solid #eee;
 }
 
 .status-baixo{
-
-color:red;
-font-weight:bold;
-
+    color:red;
+    font-weight:bold;
 }
 
 .status-ok{
+    color:#16a34a;
+    font-weight:bold;
+}
 
-color:#16a34a;
-font-weight:bold;
-
+h2{
+    color:#166534;
 }
 
 </style>
@@ -172,19 +146,37 @@ font-weight:bold;
 
 <div>
 
-<h1>🏥 {{ ubs.nome }}</h1>
+<h1>
+<i class="fa-solid fa-hospital"></i>
+{{ ubs.nome }}
+</h1>
 
 <div class="info">
 
-<div>📍 {{ ubs.endereco }}</div>
+<div>
+<i class="fa-solid fa-location-dot"></i>
+{{ ubs.endereco }}
+</div>
 
-<div>🏘 {{ ubs.bairro }}</div>
+<div>
+<i class="fa-solid fa-map-location-dot"></i>
+{{ ubs.bairro }}
+</div>
 
-<div>🏙 {{ ubs.cidade }}</div>
+<div>
+<i class="fa-solid fa-city"></i>
+{{ ubs.cidade }}
+</div>
 
-<div>☎ {{ ubs.telefone }}</div>
+<div>
+<i class="fa-solid fa-phone"></i>
+{{ ubs.telefone }}
+</div>
 
-<div>🕒 {{ ubs.horario_funcionamento }}</div>
+<div>
+<i class="fa-regular fa-clock"></i>
+{{ ubs.horario_funcionamento }}
+</div>
 
 </div>
 
@@ -196,20 +188,22 @@ font-weight:bold;
 <div class="buttons">
 
 <a
-class="btn btn-green"
+class="btn btn-blue"
 target="_blank"
 href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ ubs.longitude }}">
 
-🧭 Como chegar
+<i class="fa-solid fa-route"></i>
+Como chegar
 
 </a>
 
 <a
-    class="btn btn-green"
-    href="https://wa.me/55{{ ubs.telefone | replace('(', '') | replace(')', '') | replace('-', '') | replace(' ', '') }}"
-    target="_blank">
+class="btn btn-green"
+href="https://wa.me/55{{ ubs.telefone | replace('(', '') | replace(')', '') | replace('-', '') | replace(' ', '') }}"
+target="_blank">
 
-    <i class="fab fa-whatsapp"></i> WhatsApp
+<i class="fab fa-whatsapp"></i>
+WhatsApp
 
 </a>
 
@@ -221,7 +215,8 @@ href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ u
 
 <h2 style="margin-top:40px;">
 
-💊 Medicamentos disponíveis
+<i class="fa-solid fa-pills"></i>
+Medicamentos disponíveis
 
 </h2>
 
@@ -229,13 +224,25 @@ href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ u
 
 <tr>
 
-<th>Medicamento</th>
+<th>
+<i class="fa-solid fa-capsules"></i>
+Medicamento
+</th>
 
-<th>Quantidade</th>
+<th>
+<i class="fa-solid fa-boxes-stacked"></i>
+Quantidade
+</th>
 
-<th>Lote</th>
+<th>
+<i class="fa-solid fa-barcode"></i>
+Lote
+</th>
 
-<th>Validade</th>
+<th>
+<i class="fa-regular fa-calendar-check"></i>
+Validade
+</th>
 
 </tr>
 
@@ -250,17 +257,15 @@ href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ u
 {% if estoque.quantidade < 20 %}
 
 <span class="status-baixo">
-
+<i class="fa-solid fa-triangle-exclamation"></i>
 {{ estoque.quantidade }}
-
 </span>
 
 {% else %}
 
 <span class="status-ok">
-
+<i class="fa-solid fa-circle-check"></i>
 {{ estoque.quantidade }}
-
 </span>
 
 {% endif %}
@@ -281,51 +286,36 @@ href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ u
 
 </div>
 
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
-const map=L.map('map').setView(
-
+const map = L.map('map').setView(
 [
 {{ ubs.latitude }},
 {{ ubs.longitude }}
 ],
-
 16
-
 );
 
 L.tileLayer(
-
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-
 {
-
 attribution:'© OpenStreetMap'
-
 }
-
 ).addTo(map);
 
 L.marker(
-
 [
 {{ ubs.latitude }},
 {{ ubs.longitude }}
 ]
-
 )
-
 .addTo(map)
-
 .bindPopup("<b>{{ ubs.nome }}</b>")
-
 .openPopup();
 
 </script>
 
 </body>
-
 </html>
