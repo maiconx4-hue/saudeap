@@ -1,10 +1,13 @@
 from datetime import datetime
+import os
 
-from flask import render_template, current_app
-from flask_mail import Message
+import resend
 
-from extensions import mail
+from flask import render_template
+
 from models import Usuario
+
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 
 def enviar_email(
@@ -18,86 +21,35 @@ def enviar_email(
     print("INÍCIO DO ENVIO DE EMAIL")
     print("==============================")
 
+    contexto["ano"] = datetime.now().year
+
+    html = render_template(
+        template,
+        **contexto
+    )
+
     try:
 
-        contexto["ano"] = datetime.now().year
-
-        print("Template:", template)
-
-        html = render_template(
-            template,
-            **contexto
-        )
-
-        print("Template renderizado com sucesso")
-
-        print("\n===== CONFIG SMTP =====")
-        print("Servidor:", current_app.config["MAIL_SERVER"])
-        print("Porta:", current_app.config["MAIL_PORT"])
-        print("Usuário:", current_app.config["MAIL_USERNAME"])
-        print("Remetente:", current_app.config["MAIL_DEFAULT_SENDER"])
-        print("TLS:", current_app.config["MAIL_USE_TLS"])
-        print("SSL:", current_app.config["MAIL_USE_SSL"])
-        print("Senha existe?:", bool(current_app.config["MAIL_PASSWORD"]))
-        print("=======================\n")
-
+        print("Assunto:", assunto)
         print("Destinatários:", destinatarios)
 
-        msg = Message(
-            subject=assunto,
-            recipients=destinatarios,
-            html=html
-        )
+        params = {
+            "from": os.getenv("RESEND_FROM"),
+            "to": destinatarios,
+            "subject": assunto,
+            "html": html
+        }
 
-        import socket
+        resposta = resend.Emails.send(params)
 
-        print("Resolvendo smtp.gmail.com...")
-
-        print(socket.gethostbyname("smtp.gmail.com"))
-
-        print("DNS OK")
-
-        print("Objeto Message criado")
-
-        print("Abrindo conexão SMTP...")
-
-        import socket
-
-        print("Testando conexão TCP...")
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(10)
-
-        try:
-            s.connect(("smtp.gmail.com", 587))
-            print("TCP OK")
-        except Exception as e:
-            print("TCP ERRO:", e)
-        finally:
-            s.close()
-
-
-
-
-        with mail.connect() as conn:
-
-            print("Conexão aberta!")
-
-            print("Enviando mensagem...")
-
-            conn.send(msg)
-
-            print("Mensagem enviada!")
-
-        print("Conexão encerrada")
-        print("EMAIL ENVIADO COM SUCESSO!")
+        print("EMAIL ENVIADO COM SUCESSO")
+        print(resposta)
 
     except Exception as e:
 
-        print("\n######## ERRO NO ENVIO ########")
-        print("Tipo:", type(e).__name__)
-        print("Mensagem:", repr(e))
-        print("###############################\n")
+        print("ERRO AO ENVIAR EMAIL")
+        print(type(e).__name__)
+        print(str(e))
 
         raise
 
@@ -110,8 +62,6 @@ def enviar_alerta_estoque_baixo(
     minimo,
     sistema
 ):
-
-    print("Chamando enviar_alerta_estoque_baixo()")
 
     enviar_email(
         assunto="⚠️ SaúdeAP - Estoque Baixo",
@@ -132,8 +82,6 @@ def enviar_alerta_estoque_zero(
     sistema
 ):
 
-    print("Chamando enviar_alerta_estoque_zero()")
-
     enviar_email(
         assunto="🚨 SaúdeAP - Estoque Zerado",
         destinatarios=destinatarios,
@@ -152,23 +100,27 @@ def emails_administradores():
 
     print("Quantidade total:", len(usuarios))
 
+    administradores = []
+
     for u in usuarios:
+
         print(
             f"ID={u.id} | "
             f"EMAIL={u.email} | "
-            f"ATIVO={u.ativo} ({type(u.ativo)}) | "
-            f"PERFIL={u.perfil} ({type(u.perfil)})"
+            f"ATIVO={u.ativo} | "
+            f"PERFIL={u.perfil}"
         )
 
-    administradores = Usuario.query.filter(
-        Usuario.ativo == True,
-        Usuario.perfil == "ADMINISTRADOR"
-    ).all()
+        if (
+            u.ativo is True and
+            str(u.perfil).upper() == "ADMINISTRADOR"
+        ):
+            administradores.append(u.email)
 
     print("\n======= ADMINISTRADORES =======")
     print("Quantidade encontrada:", len(administradores))
 
-    for a in administradores:
-        print(a.email)
+    for email in administradores:
+        print(email)
 
-    return [u.email for u in administradores]
+    return administradores

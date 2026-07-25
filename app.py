@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 from extensions import db, jwt
 from config import Config
-from extensions import mail
+
 
 from schema import criar_ou_atualizar_estrutura
 
@@ -16,7 +16,7 @@ def create_app():
     CORS(app)
     db.init_app(app)
     jwt.init_app(app)    
-    mail.init_app(app)
+  
 
     # Importa os modelos
     from models import Usuario, UBS, Medicamento, Estoque, Movimentacao

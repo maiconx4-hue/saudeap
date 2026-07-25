@@ -1,10 +1,10 @@
 import os
 from datetime import timedelta
 
-from flask_mail import Mail
+
 from dotenv import load_dotenv
 
-mail = Mail()
+
 
 load_dotenv()
 
@@ -85,61 +85,9 @@ class Config:
     #URL_SISTEMA = "http://localhost:5000"
     RL_SISTEMA = "https://saudeap.onrender.com"
 
-    # ==========================================
-    # FLASK MAIL
-    # ==========================================
+    
 
-    MAIL_SERVER = os.getenv(
-        "MAIL_SERVER",
-        "smtp.gmail.com"
-    )
 
-    MAIL_PORT = int(
-        os.getenv("MAIL_PORT", 587)
-    )
-
-    MAIL_USE_TLS = (
-        os.getenv("MAIL_USE_TLS", "True") == "True"
-    )
-
-    MAIL_USE_SSL = (
-        os.getenv("MAIL_USE_SSL", "False") == "True"
-    )
-
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-
-    MAIL_DEFAULT_SENDER = os.getenv(
-        "MAIL_DEFAULT_SENDER",
-        MAIL_USERNAME
-    )
-
-    # ==========================================
-    # DEBUG CONFIG
-    # ==========================================
-
-    print("\n========== CONFIGURAÇÃO ==========")
-
-    print("MAIL_SERVER:", MAIL_SERVER)
-
-    print("MAIL_PORT:", MAIL_PORT)
-
-    print("MAIL_USE_TLS:", MAIL_USE_TLS)
-
-    print("MAIL_USE_SSL:", MAIL_USE_SSL)
-
-    print("MAIL_USERNAME:", MAIL_USERNAME)
-
-    print("MAIL_DEFAULT_SENDER:", MAIL_DEFAULT_SENDER)
-
-    print("MAIL_PASSWORD EXISTE?:", bool(MAIL_PASSWORD))
-
-    print("JWT_SECRET_KEY EXISTE?:", bool(JWT_SECRET_KEY))
-
-    print("SECRET_KEY EXISTE?:", bool(SECRET_KEY))
-
-    print("==================================\n")
 
     @classmethod
     def validar_segredos(cls):
