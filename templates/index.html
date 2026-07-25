@@ -7,13 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="https://unpkg.com/lucide-static@latest/font/lucide.css">
+
+  <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 </head>
 <body>
   <!-- Header -->
   <header style="background:var(--card);border-bottom:1px solid var(--border);">
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;padding:1rem;">
       <a href="{{ url_for('index') }}" style="display:flex;align-items:center;gap:0.625rem;">
-        <div class="sidebar-logo">❤</div>
+        <div class="sidebar-logo">
+          <i class="fa-solid fa-heart-pulse"></i>
+            </div>
         <div>
           <h1 style="font-size:1.125rem;font-weight:700;line-height:1.2;">SaúdeAP</h1>
           <p style="font-size:0.625rem;color:var(--text-muted);">Medicamentos UBS do Amapá</p>
@@ -30,7 +36,7 @@
     <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,138,94,0.05),rgba(14,165,233,0.05),transparent);"></div>
     <div class="container" style="position:relative;text-align:center;padding:4rem 1rem 6rem;">
       <span class="hero-badge">
-        💊 Consulta gratuita de medicamentos
+        <i class="fa-solid fa-pills" style="margin-right:0.4rem;"></i> Consulta gratuita de medicamentos
       </span>
       <h2 style="font-size:2rem;max-width:48rem;margin:0 auto;line-height:1.3;">
         Encontre seu medicamento na UBS mais próxima
@@ -46,8 +52,10 @@
             class="form-input"
             onkeydown="if(event.key==='Enter') searchMed()">
 
-      
-          <button class="btn btn-primary btn-lg" onclick="searchMed()" id="searchBtn">Buscar</button>
+
+          <button class="btn btn-primary btn-lg" onclick="searchMed()" id="searchBtn">
+            <i class="fa-solid fa-magnifying-glass" style="margin-right:0.4rem;"></i>Buscar
+          </button>
         </div>
       </div>
     </div>
@@ -70,7 +78,7 @@
   <footer style="border-top:1px solid var(--border);margin-top:3rem;">
     <div class="container" style="padding:1.5rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
       <div style="display:flex;align-items:center;gap:0.5rem;">
-        <span style="color:var(--primary);">❤</span>
+        <i class="fa-solid fa-heart" style="color:var(--primary);"></i>
         <span style="font-size:0.875rem;color:var(--text-muted);">SaúdeAP — Sistema de Consulta de Medicamentos</span>
       </div>
       <span style="font-size:0.75rem;color:var(--text-muted);">Amapá, Brasil</span>
@@ -99,7 +107,7 @@
       const el = document.getElementById('tabContent');
       if (activeTab === 'ubs') {
         if (ubsList.length === 0) {
-          el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏥</div><h3>Nenhuma UBS cadastrada</h3></div>`;
+          el.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-hospital"></i></div><h3>Nenhuma UBS cadastrada</h3></div>`;
           return;
         }
         el.innerHTML = `<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">` +
@@ -121,7 +129,7 @@
                     align-items:center;
                     justify-content:center;
                 ">
-                    🏥
+                    <i class="fa-solid fa-hospital" style="color:var(--primary);font-size:1.05rem;"></i>
                 </div>
 
                 <h3 style="font-weight:600;">
@@ -132,14 +140,14 @@
 
               <div style="font-size:.875rem;color:var(--text-muted);">
 
-                  <p>📍 ${u.endereco}, ${u.bairro}</p>
+                  <p><i class="fa-solid fa-location-dot" style="width:1rem;margin-right:0.35rem;color:var(--text-muted);"></i>${u.endereco}, ${u.bairro}</p>
 
                   ${u.telefone ? `
-                      <p>📞 ${u.telefone}</p>
+                      <p><i class="fa-solid fa-phone" style="width:1rem;margin-right:0.35rem;color:var(--text-muted);"></i>${u.telefone}</p>
                   ` : ""}
 
                   ${u.horario_funcionamento ? `
-                      <p>🕐 ${u.horario_funcionamento}</p>
+                      <p><i class="fa-regular fa-clock" style="width:1rem;margin-right:0.35rem;color:var(--text-muted);"></i>${u.horario_funcionamento}</p>
                   ` : ""}
 
               </div>
@@ -149,7 +157,7 @@
                   color:#16a34a;
                   font-weight:600;
               ">
-                  Ver localização →
+                  Ver localização <i class="fa-solid fa-arrow-right" style="margin-left:0.25rem;"></i>
               </div>
 
             </div>
@@ -158,7 +166,7 @@
         `).join('') + `</div>`;
       } else {
         el.innerHTML = `<div style="text-align:center;padding:3rem 1rem;">
-          <div class="empty-state-icon">🔍</div>
+          <div class="empty-state-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
           <h3 style="font-weight:600;font-size:1.125rem;">Pesquise um medicamento</h3>
           <p style="font-size:0.875rem;color:var(--text-muted);margin-top:0.25rem;">Digite o nome ou princípio ativo para encontrar onde está disponível</p>
         </div>`;
@@ -169,13 +177,13 @@
       const term = document.getElementById('searchInput').value.trim();
       if (!term) return;
       const btn = document.getElementById('searchBtn');
-      btn.textContent = 'Buscando...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.4rem;"></i>Buscando...';
       btn.disabled = true;
       try {
         const results = await api(`/api/consulta?q=${encodeURIComponent(term)}`);
         const el = document.getElementById('tabContent');
         if (results.length === 0) {
-          el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><h3>Nenhum resultado encontrado</h3><p style="color:var(--text-muted);">Não encontramos "${term}" disponível nas UBS.</p></div>`;
+          el.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-circle-xmark"></i></div><h3>Nenhum resultado encontrado</h3><p style="color:var(--text-muted);">Não encontramos "${term}" disponível nas UBS.</p></div>`;
         } else {
           el.innerHTML = `<p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem;">${results.length} medicamento(s) encontrado(s) para "${term}"</p>` +
             results.map(item => `
@@ -193,7 +201,9 @@
                   const status = getEstoqueStatus(u.quantidade);
                   return `<a href="/ubs/${u.ubs.id}"><div style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
                     <div style="display:flex;align-items:center;gap:0.75rem;">
-                      <div style="width:32px;height:32px;border-radius:0.5rem;background:var(--primary-light);display:flex;align-items:center;justify-content:center;">🏥</div>
+                      <div style="width:32px;height:32px;border-radius:0.5rem;background:var(--primary-light);display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-hospital" style="color:var(--primary);font-size:0.9rem;"></i>
+                      </div>
                       <div>
                         <p style="font-size:0.875rem;font-weight:500;">${u.ubs.nome}</p>
                         <p style="font-size:0.75rem;color:var(--text-muted);">${u.ubs.bairro} — ${u.ubs.endereco}</p>
@@ -207,12 +217,12 @@
       } catch(e) {
         showToast('Erro ao buscar medicamentos', 'error');
       }
-      btn.textContent = 'Buscar';
+      btn.innerHTML = '<i class="fa-solid fa-magnifying-glass" style="margin-right:0.4rem;"></i>Buscar';
       btn.disabled = false;
     }
 
     loadUBS();
   </script>
-  
+
 </body>
 </html>
