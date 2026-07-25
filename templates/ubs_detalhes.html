@@ -202,10 +202,11 @@ href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ u
 </a>
 
 <a
-class="btn btn-blue"
-href="tel:{{ ubs.telefone }}">
+class="btn btn-green"
+href="https://wa.me/55{{ ubs.telefone | replace('(', '') | replace(')', '') | replace('-', '') | replace(' ', '') }}"
+target="_blank">
 
-📞 Ligar
+    🟢 WhatsApp
 
 </a>
 
