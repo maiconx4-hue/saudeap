@@ -12,6 +12,9 @@
 href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<link rel="stylesheet"
 href="{{ url_for('static', filename='css/style.css') }}">
 
 <style>
@@ -202,11 +205,11 @@ href="https://www.google.com/maps/dir/?api=1&destination={{ ubs.latitude }},{{ u
 </a>
 
 <a
-class="btn btn-green"
-href="https://wa.me/55{{ ubs.telefone | replace('(', '') | replace(')', '') | replace('-', '') | replace(' ', '') }}"
-target="_blank">
+    class="btn btn-green"
+    href="https://wa.me/55{{ ubs.telefone | replace('(', '') | replace(')', '') | replace('-', '') | replace(' ', '') }}"
+    target="_blank">
 
-     WhatsApp1
+    <i class="fab fa-whatsapp"></i> WhatsApp
 
 </a>
 
