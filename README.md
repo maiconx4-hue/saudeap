@@ -5,6 +5,8 @@ Sistema web para gerenciamento e consulta de medicamentos das UBS do Estado do A
 # Progrador: Maicon Sardinha
 https://saudeap.onrender.com
 
+Acesse e aguarde o servidor startar
+
 ## Tecnologias
 
 - Python
