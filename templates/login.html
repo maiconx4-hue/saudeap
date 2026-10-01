@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaúdeAP — Login</title>
+  <title>Saúde Conecta AP — Módulo Saúde</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
 </head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
   <div class="card" style="max-width:400px;width:100%;">
     <div style="text-align:center;margin-bottom:1.5rem;">
-      <div class="sidebar-logo" style="margin:0 auto 1rem;width:48px;height:48px;font-size:1.5rem;">❤</div>
-      <h1 style="font-size:1.5rem;font-weight:700;">SaúdeAP</h1>
-      <p style="font-size:0.875rem;color:var(--text-muted);">Acesse a área administrativa</p>
+      <img class="brand-mark login-brand" src="{{ url_for('static', filename='img/logo.svg') }}" alt="Saúde Conecta AP">
+      <h1 style="font-size:1.5rem;font-weight:700;">Saúde Conecta AP</h1>
+      <p style="font-size:0.875rem;color:var(--text-muted);">Acesse o painel administrativo do Módulo Saúde</p>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

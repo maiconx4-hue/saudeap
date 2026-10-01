@@ -64,7 +64,7 @@ def enviar_alerta_estoque_baixo(
 ):
 
     enviar_email(
-        assunto="⚠️ SaúdeAP - Estoque Baixo",
+        assunto="⚠️ Saúde Conecta AP - Estoque Baixo",
         destinatarios=destinatarios,
         template="emails/estoque_baixo.html",
         medicamento=medicamento,
@@ -83,7 +83,7 @@ def enviar_alerta_estoque_zero(
 ):
 
     enviar_email(
-        assunto="🚨 SaúdeAP - Estoque Zerado",
+        assunto="🚨 Saúde Conecta AP - Estoque Zerado",
         destinatarios=destinatarios,
         template="emails/estoque_zerado.html",
         medicamento=medicamento,

@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaúdeAP — Consulta de Medicamentos UBS</title>
+  <title>Saúde Conecta AP — Módulo Saúde</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
   <link rel="stylesheet" href="https://unpkg.com/lucide-static@latest/font/lucide.css">
 
   <link rel="stylesheet"
@@ -17,12 +18,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
   <header style="background:var(--card);border-bottom:1px solid var(--border);">
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;padding:1rem;">
       <a href="{{ url_for('index') }}" style="display:flex;align-items:center;gap:0.625rem;">
-        <div class="sidebar-logo">
-          <i class="fa-solid fa-heart-pulse"></i>
-            </div>
+        <img class="brand-mark" src="{{ url_for('static', filename='img/logo.svg') }}" alt="Saúde Conecta AP">
         <div>
-          <h1 style="font-size:1.125rem;font-weight:700;line-height:1.2;">SaúdeAP</h1>
-          <p style="font-size:0.625rem;color:var(--text-muted);">Medicamentos UBS do Amapá</p>
+          <h1 style="font-size:1.125rem;font-weight:700;line-height:1.2;">Saúde Conecta AP</h1>
+          <p style="font-size:0.625rem;color:var(--text-muted);">Módulo Saúde • Conecta AP</p>
         </div>
       </a>
       <a href="{{ url_for('auth.login') }}">
@@ -79,7 +78,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     <div class="container" style="padding:1.5rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
       <div style="display:flex;align-items:center;gap:0.5rem;">
         <i class="fa-solid fa-heart" style="color:var(--primary);"></i>
-        <span style="font-size:0.875rem;color:var(--text-muted);">SaúdeAP — Sistema de Consulta de Medicamentos</span>
+        <span style="font-size:0.875rem;color:var(--text-muted);">Saúde Conecta AP • Módulo Saúde — Consulta de Medicamentos</span>
       </div>
       <span style="font-size:0.75rem;color:var(--text-muted);">Amapá, Brasil</span>
     </div>

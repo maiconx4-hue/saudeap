@@ -1,4 +1,4 @@
-// ===== SaúdeAP — JavaScript Frontend =====
+// ===== Saúde Conecta AP — JavaScript Frontend =====
 
 // --- Helpers ---
 async function api(url, options = {}) {

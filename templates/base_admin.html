@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaúdeAP — Painel Administrativo</title>
+  <title>Saúde Conecta AP — Módulo Saúde</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
 </head>
 <body>
   <div class="app-layout">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-logo">❤</div>
+        <img class="brand-mark" src="{{ url_for('static', filename='img/logo.svg') }}" alt="Saúde Conecta AP">
         <div>
-          <h1 style="font-size:1.125rem;font-weight:700;line-height:1.2;">SaúdeAP</h1>
-          <p style="font-size:0.625rem;color:var(--text-muted);">Painel Administrativo</p>
+          <h1 style="font-size:1.125rem;font-weight:700;line-height:1.2;">Saúde Conecta AP</h1>
+          <p style="font-size:0.625rem;color:var(--text-muted);">Módulo Saúde • Painel Administrativo</p>
         </div>
       </div>
       <nav class="sidebar-nav">
@@ -36,7 +37,7 @@
     <div class="main-content">
       <div class="mobile-header">
         <button onclick="toggleSidebar()" class="btn btn-outline btn-sm">☰</button>
-        <span style="font-weight:700;">SaúdeAP</span>
+        <span style="font-weight:700;">Saúde Conecta AP</span>
         <div style="width:32px;"></div>
       </div>
 

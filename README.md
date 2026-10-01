@@ -1,9 +1,9 @@
-# SaúdeAP
+# Saúde Conecta AP
 
 Sistema web para gerenciamento e consulta de medicamentos das UBS do Estado do Amapá.
 
 # Progrador: Maicon Sardinha
-https://saudeap.onrender.com
+https://saude-conecta-ap.onrender.com
 
 Acesse e aguarde o servidor startar
 
