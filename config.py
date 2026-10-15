@@ -83,7 +83,7 @@ class Config:
     # URL
     # ==========================================
     #URL_SISTEMA = "http://localhost:5000"
-    URL_SISTEMA = "https://saude-conecta-ap.onrender.com"
+    URL_SISTEMA = "https://saudeap.onrender.com"
 
     
 

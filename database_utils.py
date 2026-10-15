@@ -1,7 +1,7 @@
 """
 Funções auxiliares do banco de dados.
 
-Projeto: Saúde Conecta AP
+Projeto: SaúdeAP
 """
 
 from extensions import db

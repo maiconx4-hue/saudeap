@@ -1,7 +1,7 @@
 """
 ===========================================================
 SINCRONIZADOR MYSQL -> POSTGRESQL
-Projeto: Saúde Conecta AP
+Projeto: SaúdeAP
 
 MySQL = Banco Mestre
 PostgreSQL = Espelho
